@@ -51,6 +51,35 @@ def deprocess_img(inp, img_scale, img_mean, img_std):
 def apply_cmap(inp, cmap):
     return cmap[inp]
 
+class seg_Saver():
+    """Saver class for managing parameters"""
+    def __init__(self, ckpt_dir,  condition=lambda x, y: x > y):
+        """
+        Args:
+            args (dict): dictionary with arguments.
+            ckpt_dir (str): path to directory in which to store the checkpoint.
+            best_val (float): initial best value.
+            condition (function): how to decide whether to save the new checkpoint
+                                    by comparing best value and new value (x,y).
+
+        """
+        if not os.path.exists(ckpt_dir):
+            os.makedirs(ckpt_dir)
+        self.ckpt_dir = ckpt_dir
+        self.best_val = 0
+        self.condition = condition
+
+    def _do_save(self, new_val):
+        """Check whether need to save"""
+        return self.condition(new_val, self.best_val)
+
+    def save(self, new_val, dict_to_save, logger):
+        """Save new checkpoint"""
+        if self._do_save(new_val):
+            logger.info(" New best reward {:.4f},pre-best reward was {:.4f}".format(new_val, self.best_val))
+            self.best_val = new_val
+            torch.save(dict_to_save, '{}/segmenter_checkpoint.pth.tar'.format(self.ckpt_dir))
+            return True
 
 class Saver():
     """Saver class for managing parameters"""
@@ -83,7 +112,7 @@ class Saver():
         """Save new checkpoint"""
         self._counter += 1
         if self._do_save(new_val):
-            logger.info(" New best value {:.4f}, was {:.4f}".format(new_val, self.best_val))
+            logger.info(" New best value {:.4f},pre-best was {:.4f}".format(new_val, self.best_val))
             self.best_val = new_val
             dict_to_save['best_val'] = new_val
             torch.save(dict_to_save, '{}/checkpoint.pth.tar'.format(self.ckpt_dir))

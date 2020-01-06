@@ -9,10 +9,12 @@ from torch import nn
 
 from helpers.miou_utils import compute_iu, compute_ius_accs, fast_cm
 from helpers.utils import ctime, try_except
-
-
+import pdb
+import matplotlib.pyplot as plt
 logger = logging.getLogger(__name__)
 
+
+cmap = np.load('./utils/cmap.npy')
 
 @try_except
 def validate(segmenter, val_loader, epoch, epoch2, num_classes=-1, print_every=10):
@@ -37,6 +39,7 @@ def validate(segmenter, val_loader, epoch, epoch2, num_classes=-1, print_every=1
     segmenter.eval()
 
     cm = np.zeros((num_classes, num_classes), dtype=int)
+    idx=1
     with torch.no_grad():
         for i, sample in enumerate(val_loader):
             image = sample['image']
@@ -49,6 +52,16 @@ def validate(segmenter, val_loader, epoch, epoch2, num_classes=-1, print_every=1
             # Compute IoU
             output = output.data.cpu().numpy().argmax(axis=1).astype(np.uint8)
             gt = target.data.cpu().numpy().astype(np.uint8)
+            # for i in range(4):
+            #     output_cmap=cmap[output[i]]
+            #     gt_cmap = cmap[gt[i]]
+            #     plt.subplot(4, 2, idx)
+            #     plt.imshow(output_cmap)
+            #     idx+=1
+            #     plt.subplot(4, 2, idx)
+            #     plt.imshow(gt_cmap)
+            #     idx+=1
+            # plt.show()
             # Ignore every class index larger than the number of classes
             gt_idx = gt < num_classes
             cm += fast_cm(output[gt_idx], gt[gt_idx], num_classes)
@@ -77,4 +90,16 @@ def validate(segmenter, val_loader, epoch, epoch2, num_classes=-1, print_every=1
             'Mean Acc: {:.3f}\tReward: {:.3f}').format(
                 ctime(), epoch, epoch2, miou, mfwiou, macc, reward)
     logger.info(info)
+    #if(reward > 0.5):
+
+     #   for i in range(4):
+     #       output_cmap=cmap[output[i]]
+     #       gt_cmap = cmap[gt[i]]
+     #       plt.subplot(4, 2, idx)
+     #       plt.imshow(output_cmap)
+     #       idx+=1
+     #       plt.subplot(4, 2, idx)
+     #       plt.imshow(gt_cmap)
+     #       idx+=1
+     #   plt.show()
     return reward

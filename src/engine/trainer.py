@@ -121,6 +121,7 @@ def train_task0(
                                                      Xy_train['l3'][train_idx],
                                                      Xy_train['l4'][train_idx]])
         # NOTE: Output size can change as some layers will not be connected
+        size=Xy_train['out_size']
         output = nn.functional.interpolate(
             output, size=Xy_train['out_size'], mode='bilinear')
         soft_output = nn.LogSoftmax()(output)

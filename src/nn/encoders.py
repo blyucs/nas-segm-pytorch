@@ -9,7 +9,7 @@ from .layer_factory import InvertedResidual, conv_bn_relu6
 __all__ = ['mbv2']
 
 
-model_paths = {'mbv2_voc': './data/weights/mbv2_voc_rflw.ckpt'}
+model_paths = {'mbv2_voc': '../data/weights/mbv2_voc_rflw.ckpt'}
 
 
 class MobileNetV2(nn.Module):
