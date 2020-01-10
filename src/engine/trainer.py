@@ -100,7 +100,7 @@ def train_task0(
 
     """
     # Train
-    n_examples = Xy_train['l1'].size(0)
+    n_examples = Xy_train['l1'].size(0) #1000
     batch_size = min(batch_size, n_examples)
     n_passes = (n_examples // batch_size)
     indices = np.arange(n_examples)
@@ -255,11 +255,11 @@ def train_segmenter(
         losses.update(loss.item())
         batch_time.update(time.time() - start)
 
-        if i % print_every == 0:
-            logger.info(' [{}] Train epoch: {} [{}/{}]\t'
-                        'Avg. Loss: {:.3f}\t'
-                        'Avg. Time: {:.3f}'.format(
-                            ctime(),
-                            epoch, i, len(train_loader),
-                            losses.avg, batch_time.avg
-                        ))
+        #if i % print_every == 0:
+    logger.info(' [{}] Train epoch: {}    batch_size:{}    batch_num:{}\t'
+                'Avg. Loss: {:.3f}\t'
+                'Avg. Time: {:.3f}'.format(
+                    ctime(),
+                    epoch, train_loader.batch_sampler.batch_size,len(train_loader),
+                    losses.avg, batch_time.avg
+                ))

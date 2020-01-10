@@ -99,7 +99,7 @@ class Saver():
             json.dump({k:v for k, v in args.items() if isinstance(v, (int, float, str))}, f,
                       sort_keys=True, indent=4, ensure_ascii=False)
         self.ckpt_dir = ckpt_dir
-        self.best_val = best_val
+        self.best_val = best_val  #best value of the last time controller
         self.condition = condition
         self._counter = 0
         self._save_interval = save_interval

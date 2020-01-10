@@ -12,7 +12,7 @@ from helpers.utils import ctime, try_except
 import pdb
 import matplotlib.pyplot as plt
 logger = logging.getLogger(__name__)
-
+import  pylab
 
 cmap = np.load('./utils/cmap.npy')
 
@@ -44,6 +44,8 @@ def validate(segmenter, val_loader, epoch, epoch2, num_classes=-1, print_every=1
         for i, sample in enumerate(val_loader):
             image = sample['image']
             target = sample['mask']
+            #plt.imshow(target)
+            #plt.show()
             input_var = torch.autograd.Variable(image).float().cuda()
             # Compute output
             output, _ = segmenter(input_var)
@@ -90,16 +92,29 @@ def validate(segmenter, val_loader, epoch, epoch2, num_classes=-1, print_every=1
             'Mean Acc: {:.3f}\tReward: {:.3f}').format(
                 ctime(), epoch, epoch2, miou, mfwiou, macc, reward)
     logger.info(info)
-    #if(reward > 0.5):
+    # if(reward > 0.2):
+    #
+    #    for i in range(4):
+    #        output_cmap=cmap[output[i]]
+    #        gt_cmap = cmap[gt[i]]
+    #        plt.subplot(4, 2, idx)
+    #        plt.imshow(output_cmap)
+    #        #pylab.rcParams['figure.figsize'] = (8.0, 10.0)
+    #        # idx+=1
+    #        plt.subplot(4, 2, idx)
+    #        plt.imshow(gt_cmap)
+    #        #pylab.rcParams['figure.figsize'] = (8.0, 10.0)
+    #        idx+=1
+    #    plt.show()
+    # if (reward>0.6):
+    #     fig, axes = plt.subplots(4, 2, figsize=(10, 10))
+    #     ax= axes.ravel()
+    #     for i in range(4):  #sample 4 image to show
+    #         output_cmap=cmap[output[i]]
+    #         gt_cmap = cmap[gt[i]]
+    #         ax[i*2].imshow(output_cmap)
+    #         ax[i*2].set_title("ouput image")
+    #         ax[i*2+1].imshow(gt_cmap)
+    #         ax[i*2+1].set_title("gt image")
 
-     #   for i in range(4):
-     #       output_cmap=cmap[output[i]]
-     #       gt_cmap = cmap[gt[i]]
-     #       plt.subplot(4, 2, idx)
-     #       plt.imshow(output_cmap)
-     #       idx+=1
-     #       plt.subplot(4, 2, idx)
-     #       plt.imshow(gt_cmap)
-     #       idx+=1
-     #   plt.show()
     return reward

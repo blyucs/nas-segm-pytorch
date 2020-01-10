@@ -39,7 +39,7 @@ from utils.default_args import *
 from utils.solvers import create_optimisers
 
 
-os.environ["CUDA_VISIBLE_DEVICES"]="0,1"
+os.environ["CUDA_VISIBLE_DEVICES"]="0,1,2,3"
 logging.basicConfig(level=logging.INFO)
 
 
@@ -236,6 +236,13 @@ def main():
             decoder_config, entropy, log_prob = agent.controller.sample()
             #stub the decoder arch
             #decoder_config = [[0, [0, 0, 5, 6], [4, 3, 5, 5], [2, 7, 2, 5]], [[3, 3], [2, 3], [4, 0]]]
+            #decoder_config = [[5, [0, 0, 5, 1], [4, 0, 8, 7], [6, 3, 3, 2]], [[1, 1], [3, 3], [2, 0]]]
+            #decoder_config = [[5, [0, 0, 3, 10], [3, 3, 7, 7], [7, 4, 7, 1]], [[0, 0], [2, 0], [0, 1]]] #0.7035
+            #[[1, [1, 1, 5, 9], [2, 1, 9, 1], [3, 6, 1, 9]], [[1, 3], [1, 0], [4, 2]]] #0.7040 (reward)
+            #[[6, [0, 1, 2, 5], [0, 2, 5, 3], [6, 5, 1, 10]], [[1, 3], [0, 3], [3, 4]]]  #0.7108 all cls
+            #[[1, [0, 0, 6, 0], [0, 3, 8, 3], [3, 0, 6, 3]], [[1, 2], [2, 4], [0, 4]]] #0.7137 all cls
+            # [[10, [1, 0, 8, 10], [0, 1, 3, 2], [7, 1, 4, 3]], [[3, 0], [3, 4], [3, 2]]] #0.095 worst all cls
+            # [[10, [1, 1, 5, 2], [3, 0, 3, 4], [6, 7, 5, 9]], [[0, 0], [4, 3], [3, 1]]] #0.1293 all cls
             decoder = Decoder(inp_sizes=encoder.out_sizes,
                               num_classes=args.num_classes[0],
                               config=decoder_config,
@@ -280,6 +287,7 @@ def main():
     arch_writer = open('{}/genotypes.out'.format(args.snapshot_dir), 'w')
 
     logger.info(" Pre-computing data for task0")
+    kd_net = None# stub the kd
     Xy_train = populate_task0(
         segmenter, train_loader, kd_net, args.n_task0, args.do_kd)
     if args.do_kd:
@@ -298,15 +306,15 @@ def main():
             torch.cuda.empty_cache()
             # Change dataloader
             train_loader.batch_sampler.batch_size = args.batch_size[task_idx]
-            for loader in [train_loader, val_loader]:
-                try:
-                    loader.dataset.set_config(crop_size=args.crop_size[task_idx],
-                                              shorter_side=args.shorter_side[task_idx])
-                except AttributeError:
-                    # for subset
-                    loader.dataset.dataset.set_config(
-                        crop_size=args.crop_size[task_idx],
-                        shorter_side=args.shorter_side[task_idx])
+            # for loader in [train_loader, val_loader]:
+            #     try:
+            #         loader.dataset.set_config(crop_size=args.crop_size[task_idx],
+            #                                   shorter_side=args.shorter_side[task_idx])
+            #     except AttributeError:
+            #         # for subset
+            #         loader.dataset.dataset.set_config(
+            #             crop_size=args.crop_size[task_idx],
+            #             shorter_side=args.shorter_side[task_idx])
 
             logger.info(" Training Task {}".format(str(task_idx)))
             # Optimisers
@@ -323,6 +331,7 @@ def main():
                 segmenter.module.decoder.parameters())
             avg_param = init_polyak(
                 args.do_polyak, segmenter.module.decoder if task_idx == 0 else segmenter)
+            kd_crit = None #stub the kd
             for epoch_segm in range(args.num_segm_epochs[task_idx]): #[5,1] [20,8]
                 if task_idx == 0:
                     train_task0(Xy_train, #train the decoder once
@@ -377,7 +386,7 @@ def main():
                         stop = True
                         break
             reward = task_miou  # will be used in train_agent process
-        do_search = False
+        #do_search = False
         if do_search:
             logger.info(" Training Controller")
             sample = ((decoder_config), reward, entropy, log_prob)

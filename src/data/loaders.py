@@ -36,7 +36,7 @@ def create_loaders(args):
     logger = logging.getLogger(__name__)
     composed_trn = transforms.Compose([
         ResizeShorterScale(args.shorter_side[0], args.low_scale, args.high_scale),
-        RandomMirror(),
+        #RandomMirror(),
         RandomCrop(args.crop_size[0]),
         Normalise(*args.normalise_params),
         ToTensor()])

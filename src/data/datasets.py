@@ -12,6 +12,7 @@ import torch
 from PIL import Image
 from torch.utils.data import Dataset
 
+import matplotlib.pyplot as plt
 
 def make_even(x):
     """Make number divisible by 2"""
@@ -250,6 +251,10 @@ class PascalCustomDataset(Dataset):
             return img_arr
         image = read_image(img_name)
         mask = np.array(Image.open(msk_name))
+        #plt.imshow(mask)
+        #plt.show()
+        #mask_image = Image.open(msk_name)
+        #mask_image.show()
         if img_name != msk_name:
             assert len(mask.shape) == 2, 'Masks must be encoded without colourmap'
         sample = {'image': image, 'mask': mask}

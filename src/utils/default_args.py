@@ -3,10 +3,17 @@
 import numpy as np
 
 # DATASET PARAMETERS
-TRAIN_DIR = '../data/datasets/VOCdevkit/'
-VAL_DIR = '../data/datasets/VOCdevkit/'
-TRAIN_LIST = '../data/lists/train.lst'
-VAL_LIST = '../data/lists/train.lst'  # meta learning
+_FACE_DATASET_ = 0
+if _FACE_DATASET_:
+    TRAIN_DIR = '../data/datasets/face_seg_dataset/'
+    VAL_DIR = '../data/datasets/face_seg_dataset/'
+    TRAIN_LIST = '../data/datasets/face_seg_dataset/train.lst'
+    VAL_LIST = '../data/datasets/face_seg_dataset/train.lst'  # meta learning
+else:
+    TRAIN_DIR = '../data/datasets/celebA/'
+    VAL_DIR = '../data/datasets/celebA/'
+    TRAIN_LIST = '../data/datasets/celebA/train_mini.lst'
+    VAL_LIST = '../data/datasets/celebA/train_mini.lst'  # meta learning
 META_TRAIN_PRCT = 90
 N_TASK0 = 1000
 SHORTER_SIDE = [300, 400]
@@ -14,9 +21,12 @@ CROP_SIZE = [256, 350]
 NORMALISE_PARAMS = [1./255, # SCALE
                     np.array([0.485, 0.456, 0.406]).reshape((1, 1, 3)), # MEAN
                     np.array([0.229, 0.224, 0.225]).reshape((1, 1, 3))] # STD
-BATCH_SIZE = [32, 16]
-NUM_WORKERS = 16
-NUM_CLASSES = [21, 21]
+BATCH_SIZE =[64, 128]
+NUM_WORKERS = 32
+if _FACE_DATASET_:
+    NUM_CLASSES = [11,11]
+else:
+    NUM_CLASSES = [19, 19]
 LOW_SCALE = 0.7
 HIGH_SCALE = 1.4
 VAL_SHORTER_SIDE = 400
@@ -32,18 +42,19 @@ DEC_AUX_WEIGHT = 0.15 # to disable aux, set to -1
 
 # GENERAL
 FREEZE_BN = [False, False]
-NUM_EPOCHS = 1000
-NUM_SEGM_EPOCHS = [200, 80] #[20, 8]#task 0(only decoder)for 20,task 1(end to end)for 8
-PRINT_EVERY = 20
+NUM_EPOCHS = 400 #20000
+NUM_SEGM_EPOCHS = [10, 4] #[20, 8]#task 0(only decoder)for 20,task 1(end to end)for 8
+PRINT_EVERY = 200
 RANDOM_SEED = 9314
 SNAPSHOT_DIR = './ckpt/'
-CKPT_PATH = './ckpt/20200104T1815/checkpoint.pth.tar'
-VAL_EVERY = [10, 10] #10,4  # how often to record validation scores ; task0 valid for every 5 eopch , task1 valid for every 1 epoch
+#CKPT_PATH = './ckpt/20200107T2001/checkpoint.pth.tar'
+CKPT_PATH='./ckpt/2020testtttt'
+VAL_EVERY = [10, 4] #10,4  # how often to record validation scores ; task0 valid for every 5 eopch , task1 valid for every 1 epoch
 SUMMARY_DIR = './tb_logs/'
 
 # OPTIMISERS' PARAMETERS
-LR_ENC = [1e-3, 1e-3]
-LR_DEC = [3e-3, 3e-3]
+LR_ENC = [4e-3, 4e-3]
+LR_DEC = [1e-2, 1e-2]
 LR_CTRL = 1e-4
 MOM_ENC = [0.9] * 3
 MOM_DEC = [0.9] * 3
@@ -54,7 +65,7 @@ WD_CTRL = 1e-4
 OPTIM_DEC = 'adam'
 OPTIM_ENC = 'sgd'
 AGENT_CTRL = 'ppo'
-DO_KD = True
+DO_KD = False#True
 KD_COEFF = 0.3
 DO_POLYAK = True
 
