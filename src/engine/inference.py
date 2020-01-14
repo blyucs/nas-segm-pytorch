@@ -106,7 +106,7 @@ def validate(segmenter, val_loader, epoch, epoch2, num_classes=-1, print_every=1
     #        #pylab.rcParams['figure.figsize'] = (8.0, 10.0)
     #        idx+=1
     #    plt.show()
-    # if (reward>0.6):
+    # if (reward>0):
     #     fig, axes = plt.subplots(4, 2, figsize=(10, 10))
     #     ax= axes.ravel()
     #     for i in range(4):  #sample 4 image to show

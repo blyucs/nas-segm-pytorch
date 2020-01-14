@@ -12,8 +12,10 @@ if _FACE_DATASET_:
 else:
     TRAIN_DIR = '../data/datasets/celebA/'
     VAL_DIR = '../data/datasets/celebA/'
-    TRAIN_LIST = '../data/datasets/celebA/train_mini.lst'
-    VAL_LIST = '../data/datasets/celebA/train_mini.lst'  # meta learning
+    #TRAIN_LIST = '../data/datasets/celebA/train_mini.lst'
+    #VAL_LIST = '../data/datasets/celebA/train_mini.lst'  # meta learning
+    TRAIN_LIST = '../data/datasets/celebA/train.lst'
+    VAL_LIST = '../data/datasets/celebA/train.lst'  # meta learning
 META_TRAIN_PRCT = 90
 N_TASK0 = 1000
 SHORTER_SIDE = [300, 400]
@@ -26,6 +28,7 @@ NUM_WORKERS = 32
 if _FACE_DATASET_:
     NUM_CLASSES = [11,11]
 else:
+    #NUM_CLASSES = [17, 17]
     NUM_CLASSES = [19, 19]
 LOW_SCALE = 0.7
 HIGH_SCALE = 1.4
@@ -42,14 +45,14 @@ DEC_AUX_WEIGHT = 0.15 # to disable aux, set to -1
 
 # GENERAL
 FREEZE_BN = [False, False]
-NUM_EPOCHS = 400 #20000
-NUM_SEGM_EPOCHS = [10, 4] #[20, 8]#task 0(only decoder)for 20,task 1(end to end)for 8
+NUM_EPOCHS = 1 #400 #20000
+NUM_SEGM_EPOCHS = [40, 10] #[20, 8]#task 0(only decoder)for 20,task 1(end to end)for 8
 PRINT_EVERY = 200
 RANDOM_SEED = 9314
 SNAPSHOT_DIR = './ckpt/'
 #CKPT_PATH = './ckpt/20200107T2001/checkpoint.pth.tar'
 CKPT_PATH='./ckpt/2020testtttt'
-VAL_EVERY = [10, 4] #10,4  # how often to record validation scores ; task0 valid for every 5 eopch , task1 valid for every 1 epoch
+VAL_EVERY = [10, 5] #10,4  # how often to record validation scores ; task0 valid for every 5 eopch , task1 valid for every 1 epoch
 SUMMARY_DIR = './tb_logs/'
 
 # OPTIMISERS' PARAMETERS
