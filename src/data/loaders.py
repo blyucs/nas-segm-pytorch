@@ -11,6 +11,7 @@ from .datasets import PascalCustomDataset as Dataset
 from .datasets import CentralCrop, Normalise, \
   RandomCrop, RandomMirror, ResizeShorterScale, ToTensor
 
+from utils.default_args import *
 
 def create_loaders(args):
     """
@@ -46,12 +47,12 @@ def create_loaders(args):
         Normalise(*args.normalise_params),
         ToTensor()])
     ## Training and validation sets ##
-    trainset = Dataset(data_file=args.train_list,
-                       data_dir=args.train_dir,
+    trainset = Dataset(data_file=dataset_dirs[args.dataset_type]['TRAIN_LIST'],
+                       data_dir=dataset_dirs[args.dataset_type]['TRAIN_DIR'],
                        transform_trn=composed_trn,
                        transform_val=composed_val)
     do_search = False
-    if args.train_list == args.val_list:
+    if dataset_dirs[args.dataset_type]['TRAIN_LIST'] == dataset_dirs[args.dataset_type]['VAL_LIST']:
         do_search = True
         # Split train into meta-train and meta-val
         n_examples = len(trainset)
@@ -59,8 +60,8 @@ def create_loaders(args):
         trainset, valset = random_split(
             trainset, [n_train, n_examples - n_train])
     else:
-        valset = Dataset(data_file=args.val_list,
-                         data_dir=args.val_dir,
+        valset = Dataset(data_file=dataset_dirs[args.dataset_type]['VAL_LIST'],
+                         data_dir=dataset_dirs[args.dataset_type]['VAL_DIR'],
                          transform_trn=None,
                          transform_val=composed_val)
     logger.info(" Created train set = {} examples, val set = {} examples; do_search = {}"

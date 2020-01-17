@@ -31,7 +31,7 @@ from data.loaders import create_loaders
 from engine.inference import validate
 from engine.trainer import populate_task0, train_task0, train_segmenter
 from helpers.utils import apply_polyak, compute_params, init_polyak, load_ckpt, \
-                          Saver, TaskPerformer, seg_Saver
+    Saver, TaskPerformer, seg_Saver
 from nn.encoders import create_encoder
 from nn.micro_decoders import MicroDecoder as Decoder
 from rl.agent import create_agent, train_agent
@@ -41,7 +41,6 @@ from utils.solvers import create_optimisers
 
 os.environ["CUDA_VISIBLE_DEVICES"]="0,1,2,3"
 logging.basicConfig(level=logging.INFO)
-
 
 def get_arguments():
     """Parse all the arguments provided from the CLI.
@@ -150,27 +149,6 @@ def get_arguments():
     parser.add_argument("--do-polyak", type=bool, default=DO_POLYAK,
                         help="Whether to do Polyak averaging.")
 
-    # Controller
-    parser.add_argument("--hidden_size", type=int, default=100,
-                        help="Number of neurons in the controller's RNN.")
-    parser.add_argument("--num_lstm_layers", type=int, default=2,
-                        help="Number of layers in the controller.")
-    parser.add_argument("--op-size", type=int, default=OP_SIZE,
-                        help="Number of unique operations.")
-    parser.add_argument("--agg-cell-size", type=int, default=AGG_CELL_SIZE,
-                        help="Common size inside decoder")
-    parser.add_argument("--bl-dec", type=float, default=BL_DEC,
-                        help="Baseline decay.")
-    parser.add_argument("--agent-ctrl", type=str, default=AGENT_CTRL,
-                        help="Gradient estimator algorithm")
-    parser.add_argument("--num-cells", type=int, default=NUM_CELLS,
-                        help="Number of cells to apply.")
-    parser.add_argument("--num-branches", type=int, default=NUM_BRANCHES,
-                        help="Number of branches inside the learned cell.")
-    parser.add_argument("--aux-cell", type=bool, default=AUX_CELL,
-                        help="Whether to use the cell design in-place of auxiliary cell.")
-    parser.add_argument("--sep-repeats", type=int, default=SEP_REPEATS,
-                        help="Number of repeats inside Sep Convolution.")
     return parser.parse_args()
 
 
@@ -197,7 +175,6 @@ def main():
     logger.info(" Running Experiment {}".format(exp_name))
     args.num_tasks = len(NUM_CLASSES[args.dataset_type])
     segm_crit = nn.NLLLoss2d(ignore_index=255).cuda()
-
     # Set-up random seeds
     torch.manual_seed(args.random_seed)
     if torch.cuda.is_available():
@@ -211,58 +188,59 @@ def main():
                 .format(compute_params(encoder)[0] / 1e6))
 
     # Generate teacher if any
-    if args.do_kd:
-        from kd.rf_lw.model_lw_v2 import rf_lw152 as kd_model
-        global kd_net, kd_crit
-        kd_crit = nn.MSELoss().cuda()
-        kd_net = kd_model(
-            pretrained=True, num_classes=NUM_CLASSES[args.dataset_type][0]).cuda().eval()
-        logger.info(" Loaded teacher, #TOTAL PARAMS={:3.2f}M".format(
-            compute_params(kd_net)[0] / 1e6))
+    # if args.do_kd:
+    # 	from kd.rf_lw.model_lw_v2 import rf_lw152 as kd_model
+    # 	global kd_net, kd_crit
+    # 	kd_crit = nn.MSELoss().cuda()
+    # 	kd_net = kd_model(
+    # 		pretrained=True, num_classes=NUM_CLASSES[args.dataset_type][0]).cuda().eval()
+    # 	logger.info(" Loaded teacher, #TOTAL PARAMS={:3.2f}M".format(
+    # 		compute_params(kd_net)[0] / 1e6))
 
     # Generate controller / RL-agent
-    agent = create_agent(
-        args.op_size,
-        args.hidden_size,
-        args.num_lstm_layers,
-        args.num_cells,
-        args.num_branches,
-        args.lr_ctrl,
-        args.bl_dec,
-        args.agent_ctrl,
-        len(encoder.out_sizes))
-    logger.info(" Loaded Controller, #TOTAL PARAMS={:3.2f}M".format(
-        compute_params(agent.controller)[0] / 1e6))
+    # agent = create_agent(
+    # 	args.op_size,
+    # 	args.hidden_size,
+    # 	args.num_lstm_layers,
+    # 	args.num_cells,
+    # 	args.num_branches,
+    # 	args.lr_ctrl,
+    # 	args.bl_dec,
+    # 	args.agent_ctrl,
+    # 	len(encoder.out_sizes))
+    # logger.info(" Loaded Controller, #TOTAL PARAMS={:3.2f}M".format(
+    # 	compute_params(agent.controller)[0] / 1e6))
 
     def create_segmenter(encoder):
         with torch.no_grad():
-            decoder_config, entropy, log_prob = agent.controller.sample()
-            #stub the decoder arch
-            #decoder_config = [[0, [0, 0, 5, 6], [4, 3, 5, 5], [2, 7, 2, 5]], [[3, 3], [2, 3], [4, 0]]]
-            #decoder_config = [[5, [0, 0, 5, 1], [4, 0, 8, 7], [6, 3, 3, 2]], [[1, 1], [3, 3], [2, 0]]]
-            #decoder_config = [[5, [0, 0, 3, 10], [3, 3, 7, 7], [7, 4, 7, 1]], [[0, 0], [2, 0], [0, 1]]] #0.7035
-            #[[1, [1, 1, 5, 9], [2, 1, 9, 1], [3, 6, 1, 9]], [[1, 3], [1, 0], [4, 2]]] #0.7040 (reward)
-            #[[6, [0, 1, 2, 5], [0, 2, 5, 3], [6, 5, 1, 10]], [[1, 3], [0, 3], [3, 4]]]  #0.7108 all cls
-            #decoder_config = [[1, [0, 0, 6, 0], [0, 3, 8, 3], [3, 0, 6, 3]], [[1, 2], [2, 4], [0, 4]]] #0.7137 all cls
-            #decoder_config = [[10, [1, 0, 8, 10], [0, 1, 3, 2], [7, 1, 4, 3]], [[3, 0], [3, 4], [3, 2]]] #0.095 worst all cls
+#			decoder_config, entropy, log_prob = agent.controller.sample()
+            # stub the decoder arch
+            # decoder_config = [[0, [0, 0, 5, 6], [4, 3, 5, 5], [2, 7, 2, 5]], [[3, 3], [2, 3], [4, 0]]]
+            # decoder_config = [[5, [0, 0, 5, 1], [4, 0, 8, 7], [6, 3, 3, 2]], [[1, 1], [3, 3], [2, 0]]]
+            # decoder_config = [[5, [0, 0, 3, 10], [3, 3, 7, 7], [7, 4, 7, 1]], [[0, 0], [2, 0], [0, 1]]] #0.7035
+            # [[1, [1, 1, 5, 9], [2, 1, 9, 1], [3, 6, 1, 9]], [[1, 3], [1, 0], [4, 2]]] #0.7040 (reward)
+            # [[6, [0, 1, 2, 5], [0, 2, 5, 3], [6, 5, 1, 10]], [[1, 3], [0, 3], [3, 4]]]  #0.7108 all cls
+            # decoder_config = [[1, [0, 0, 6, 0], [0, 3, 8, 3], [3, 0, 6, 3]], [[1, 2], [2, 4], [0, 4]]] #0.7137 all cls
+            # decoder_config = [[10, [1, 0, 8, 10], [0, 1, 3, 2], [7, 1, 4, 3]], [[3, 0], [3, 4], [3, 2]]] #0.095 worst all cls
             # [[10, [1, 1, 5, 2], [3, 0, 3, 4], [6, 7, 5, 9]], [[0, 0], [4, 3], [3, 1]]] #0.1293 all cls
-            #decoder_config = [[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2]]] # 0.7816 reward
+            decoder_config = [[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2]]] # 0.7816 reward
+
             decoder = Decoder(inp_sizes=encoder.out_sizes,
                               num_classes=NUM_CLASSES[args.dataset_type][0],
                               config=decoder_config,
-                              agg_size=args.agg_cell_size,
-                              aux_cell=args.aux_cell,
-                              repeats=args.sep_repeats)
+                              agg_size=48,   #args.agg_cell_size, what's the fxxk
+                              aux_cell=True,  #args.aux_cell,
+                              repeats=1)#args.sep_repeats)
 
         # Fuse encoder and decoder
         segmenter = nn.DataParallel(Segmenter(encoder, decoder)).cuda()
         logger.info(" Created Segmenter, #PARAMS (Total, No AUX)={}".format(
             compute_params(segmenter)
         ))
-        return segmenter, decoder_config, entropy, log_prob
+        return segmenter, decoder_config#, entropy, log_prob
 
     # Sample first configuration
-    segmenter, decoder_config, entropy, log_prob = create_segmenter(encoder)
+    segmenter, decoder_config, = create_segmenter(encoder)
     del encoder
 
     # Create dataloaders
@@ -274,21 +252,21 @@ def main():
                for idx, _ in enumerate(range(args.num_tasks))]
 
     # Restore from previous checkpoint if any
-    best_val, epoch_start = load_ckpt(args.ckpt_path,
-                                      {'agent': agent})
+    # best_val, epoch_start = load_ckpt(args.ckpt_path,
+    #                                   {'agent': agent})
 
     # Saver: keeping checkpoint with best validation score (a.k.a best reward)
     now = datetime.datetime.now()
-    args.snapshot_dir = args.snapshot_dir+'search'+"{:%Y%m%dT%H%M}".format(now)
+    args.snapshot_dir = args.snapshot_dir+'train'+"{:%Y%m%dT%H%M}".format(now)
 
-    saver = Saver(args=vars(args),
-                  ckpt_dir=args.snapshot_dir,
-                  best_val=best_val,
-                  condition=lambda x, y: x > y)
+    # saver = Saver(args=vars(args),
+    #               ckpt_dir=args.snapshot_dir,
+    #               best_val=best_val,
+    #               condition=lambda x, y: x > y)
     seg_saver=seg_Saver(ckpt_dir=args.snapshot_dir,
                         condition=lambda  x, y:x > y)
 
-    arch_writer = open('{}/genotypes.out'.format(args.snapshot_dir), 'w')
+    # arch_writer = open('{}/genotypes.out'.format(args.snapshot_dir), 'w')
 
     logger.info(" Pre-computing data for task0")
     kd_net = None# stub the kd
@@ -298,129 +276,94 @@ def main():
         del kd_net
 
     logger.info(" Training Process Starts")
-    for epoch in range(epoch_start, args.num_epochs): #num_epochs=20000? 1000?
-        reward = 0.0
-        start = time.time()
+    for task_idx in range(args.num_tasks):#0,1
+        # if stop:
+        # 	break
         torch.cuda.empty_cache()
-        logger.info(" Training Segmenter, Epoch {}".format(str(epoch)))
-        stop = False
-        for task_idx in range(args.num_tasks):#0,1
-            if stop:
-                break
-            torch.cuda.empty_cache()
-            # Change dataloader
-            train_loader.batch_sampler.batch_size = args.batch_size[task_idx]
-            # for loader in [train_loader, val_loader]:
-            #     try:
-            #         loader.dataset.set_config(crop_size=args.crop_size[task_idx],
-            #                                   shorter_side=args.shorter_side[task_idx])
-            #     except AttributeError:
-            #         # for subset
-            #         loader.dataset.dataset.set_config(
-            #             crop_size=args.crop_size[task_idx],
-            #             shorter_side=args.shorter_side[task_idx])
+        # Change dataloader
+        train_loader.batch_sampler.batch_size = args.batch_size[task_idx]
+        # for loader in [train_loader, val_loader]:
+        #     try:
+        #         loader.dataset.set_config(crop_size=args.crop_size[task_idx],
+        #                                   shorter_side=args.shorter_side[task_idx])
+        #     except AttributeError:
+        #         # for subset
+        #         loader.dataset.dataset.set_config(
+        #             crop_size=args.crop_size[task_idx],
+        #             shorter_side=args.shorter_side[task_idx])
 
-            logger.info(" Training Task {}".format(str(task_idx)))
-            # Optimisers
-            optim_enc, optim_dec = create_optimisers(
-                args.optim_enc,
-                args.optim_dec,
-                args.lr_enc[task_idx],
-                args.lr_dec[task_idx],
-                args.mom_enc[task_idx],
-                args.mom_dec[task_idx],
-                args.wd_enc[task_idx],
-                args.wd_dec[task_idx],
-                segmenter.module.encoder.parameters(),
-                segmenter.module.decoder.parameters())
-            avg_param = init_polyak(
-                args.do_polyak, segmenter.module.decoder if task_idx == 0 else segmenter)
-            kd_crit = None #stub the kd
-            for epoch_segm in range(args.num_segm_epochs[task_idx]): #[5,1] [20,8]
-                if task_idx == 0:
-                    train_task0(Xy_train, #train the decoder once
-                                segmenter,
+        logger.info(" Training Task {}".format(str(task_idx)))
+        # Optimisers
+        optim_enc, optim_dec = create_optimisers(
+            args.optim_enc,
+            args.optim_dec,
+            args.lr_enc[task_idx],
+            args.lr_dec[task_idx],
+            args.mom_enc[task_idx],
+            args.mom_dec[task_idx],
+            args.wd_enc[task_idx],
+            args.wd_dec[task_idx],
+            segmenter.module.encoder.parameters(),
+            segmenter.module.decoder.parameters())
+        avg_param = init_polyak(
+            args.do_polyak, segmenter.module.decoder if task_idx == 0 else segmenter)
+        kd_crit = None #stub the kd
+        for epoch_segm in range(args.num_segm_epochs[task_idx]): #[5,1] [20,8]
+            if task_idx == 0:
+                train_task0(Xy_train, #train the decoder once
+                            segmenter,
+                            optim_dec,
+                            epoch_segm,#[5,1]
+                            segm_crit,
+                            kd_crit,
+                            args.batch_size[0],
+                            args.freeze_bn[0],
+                            args.do_kd,
+                            args.kd_coeff,
+                            args.dec_grad_clip,
+                            args.do_polyak,
+                            avg_param=avg_param,
+                            polyak_decay=0.9,
+                            aux_weight=args.dec_aux_weight)
+            else:
+                train_segmenter(segmenter,  #train the segmenter end to end onece
+                                train_loader,
+                                optim_enc,
                                 optim_dec,
-                                epoch_segm,#[5,1]
+                                epoch_segm, #[5,1]
                                 segm_crit,
-                                kd_crit,
-                                args.batch_size[0],
-                                args.freeze_bn[0],
-                                args.do_kd,
-                                args.kd_coeff,
+                                args.freeze_bn[1],
+                                args.enc_grad_clip,
                                 args.dec_grad_clip,
                                 args.do_polyak,
+                                args.print_every,
+                                aux_weight=args.dec_aux_weight,
                                 avg_param=avg_param,
-                                polyak_decay=0.9,
-                                aux_weight=args.dec_aux_weight)
+                                polyak_decay=0.99)
+            apply_polyak(args.do_polyak,
+                         segmenter.module.decoder if task_idx == 0 else segmenter,
+                         avg_param)
+            if (epoch_segm + 1) % (args.val_every[task_idx]) == 0:
+                logger.info(
+                    " Validating Segmenter, Epoch {}, Task {}"
+                        .format(str(9876), str(task_idx)))
+                task_miou = validate(segmenter,
+                                     val_loader,
+                                     9876,
+                                     epoch_segm, #[5,1]
+                                     num_classes=NUM_CLASSES[args.dataset_type][task_idx],
+                                     print_every=args.print_every)
+                # Verifying if we are continuing training this architecture.
+                c_task_ps = task_ps[task_idx][(epoch_segm + 1) // args.val_every[task_idx] - 1]
+                if c_task_ps.step(task_miou):
+                    continue
                 else:
-                    train_segmenter(segmenter,  #train the segmenter end to end onece
-                                    train_loader,
-                                    optim_enc,
-                                    optim_dec,
-                                    epoch_segm, #[5,1]
-                                    segm_crit,
-                                    args.freeze_bn[1],
-                                    args.enc_grad_clip,
-                                    args.dec_grad_clip,
-                                    args.do_polyak,
-                                    args.print_every,
-                                    aux_weight=args.dec_aux_weight,
-                                    avg_param=avg_param,
-                                    polyak_decay=0.99)
-                apply_polyak(args.do_polyak,
-                             segmenter.module.decoder if task_idx == 0 else segmenter,
-                             avg_param)
-                if (epoch_segm + 1) % (args.val_every[task_idx]) == 0:
-                    logger.info(
-                        " Validating Segmenter, Epoch {}, Task {}"
-                        .format(str(epoch), str(task_idx)))
-                    task_miou = validate(segmenter,
-                                         val_loader,
-                                         epoch,
-                                         epoch_segm, #[5,1]
-                                         num_classes=NUM_CLASSES[args.dataset_type][task_idx],
-                                         print_every=args.print_every)
-                    # Verifying if we are continuing training this architecture.
-                    c_task_ps = task_ps[task_idx][(epoch_segm + 1) // args.val_every[task_idx] - 1]
-                    if c_task_ps.step(task_miou):
-                        continue
-                    else:
-                        logger.info(" Interrupting")
-                        stop = True
-                        break
-            reward = task_miou  # will be used in train_agent process
-        #do_search = False
-        if do_search:
-            logger.info(" Training Controller")
-            sample = ((decoder_config), reward, entropy, log_prob)
-            train_agent(agent, sample)
-            # Log this epoch
-            _, params = compute_params(segmenter)
-            logger.info(" Decoder: {}".format(decoder_config))
-            # Save controller params
-            saver.save(reward, {'agent': agent.state_dict(), 'epoch': epoch}, logger)
-            # save the segmenter params
-            seg_saver.save(reward, segmenter.state_dict(), logger)
-            # Save genotypes
-            epoch_time = (time.time() - start) / \
-                sum(args.num_segm_epochs[:(task_idx + 1)])
-            arch_writer.write(
-                'reward: {:.4f}, Epoch: {}, params: {}, epoch_time: {:.4f}, genotype: {}\n'
-                .format(reward, epoch, params, epoch_time, decoder_config))
-            arch_writer.flush()
-            #Log genotypes
-            logger.info(
-                'reward: {:.4f}, Epoch: {}, params: {}, epoch_time: {:.4f}, genotype: {}\n'
-                    .format(reward, epoch, params, epoch_time, decoder_config))
-            # Sample a new architecture
-            del segmenter
-            encoder = create_encoder()
-            segmenter, decoder_config, entropy, log_prob = create_segmenter(encoder)
-            del encoder
-        else:
-            # save the segmenter params
-            seg_saver.save(reward, segmenter.state_dict(), logger)
+                    logger.info(" Interrupting")
+                    stop = True
+                    break
+        reward = task_miou  # will be used in train_agent process
+        # save the segmenter params
+        seg_saver.save(reward, segmenter.state_dict(), logger)
 
 
 if __name__ == '__main__':

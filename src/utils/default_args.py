@@ -3,21 +3,28 @@
 import numpy as np
 
 # DATASET PARAMETERS
-_FACE_DATASET_ = 0
-if _FACE_DATASET_:
-    TRAIN_DIR = '../data/datasets/face_seg_dataset/'
-    VAL_DIR = '../data/datasets/face_seg_dataset/'
-    TRAIN_LIST = '../data/datasets/face_seg_dataset/train.lst'
-    VAL_LIST = '../data/datasets/face_seg_dataset/train.lst'  # meta learning
-else:
-    TRAIN_DIR = '../data/datasets/celebA/'
-    VAL_DIR = '../data/datasets/celebA/'
-    #TRAIN_LIST = '../data/datasets/celebA/train_mini.lst'
-    #VAL_LIST = '../data/datasets/celebA/train_mini.lst'  # meta learning
-    TRAIN_LIST = '../data/datasets/celebA/train.lst'
-    VAL_LIST = '../data/datasets/celebA/train.lst'  # meta learning
+dataset_dirs = {
+    'face_seg':
+        {
+            'TRAIN_DIR':'../data/datasets/face_seg_dataset/',
+            'VAL_DIR':'../data/datasets/face_seg_dataset/',
+            'TRAIN_LIST':'../data/datasets/face_seg_dataset/train.lst',
+            'VAL_LIST' : '../data/datasets/face_seg_dataset/train.lst'  # meta learning
+        },
+    'celebA':
+        {
+            'TRAIN_DIR': '../data/datasets/celebA/',
+            'VAL_DIR' : '../data/datasets/celebA/',
+            #TRAIN_LIST = '../data/datasets/celebA/train_mini.lst'
+            #VAL_LIST = '../data/datasets/celebA/train_mini.lst'  # meta learning
+            'TRAIN_LIST' : '../data/datasets/celebA/train.lst',
+            'VAL_LIST' : '../data/datasets/celebA/train.lst'  # meta learning
+        }
+}
+
+
 META_TRAIN_PRCT = 90
-N_TASK0 = 1000
+N_TASK0 = {'face_seg':1000,'celebA':1000}
 SHORTER_SIDE = [300, 400]
 CROP_SIZE = [256, 350]
 NORMALISE_PARAMS = [1./255, # SCALE
@@ -25,11 +32,8 @@ NORMALISE_PARAMS = [1./255, # SCALE
                     np.array([0.229, 0.224, 0.225]).reshape((1, 1, 3))] # STD
 BATCH_SIZE =[64, 128]
 NUM_WORKERS = 32
-if _FACE_DATASET_:
-    NUM_CLASSES = [11,11]
-else:
-    #NUM_CLASSES = [17, 17]
-    NUM_CLASSES = [19, 19]
+
+NUM_CLASSES = {'face_seg':[11,11],'celebA':[19,19]}
 LOW_SCALE = 0.7
 HIGH_SCALE = 1.4
 VAL_SHORTER_SIDE = 400
