@@ -19,26 +19,34 @@ dataset_dirs = {
             #VAL_LIST = '../data/datasets/celebA/train_mini.lst'  # meta learning
             'TRAIN_LIST' : '../data/datasets/celebA/train.lst',
             'VAL_LIST' : '../data/datasets/celebA/train.lst'  # meta learning
+        },
+    'EG1800':
+        {
+
+            'TRAIN_DIR': '../data/datasets/portrait_seg/EG1800/',
+            'VAL_DIR': '../data/datasets/portrait_seg/EG1800/',
+            'TRAIN_LIST': '../data/datasets/portrait_seg/EG1800/train.lst',
+            'VAL_LIST': '../data/datasets/portrait_seg/EG1800/train.lst'  # meta learning
         }
 }
 
 
 META_TRAIN_PRCT = 90
-N_TASK0 = {'face_seg':1000,'celebA':1000}
+N_TASK0 = {'face_seg':1000,'celebA':1000,'EG1800':1000}
 SHORTER_SIDE = [300, 400]
 CROP_SIZE = [256, 350]
 NORMALISE_PARAMS = [1./255, # SCALE
                     np.array([0.485, 0.456, 0.406]).reshape((1, 1, 3)), # MEAN
                     np.array([0.229, 0.224, 0.225]).reshape((1, 1, 3))] # STD
-BATCH_SIZE =[64, 128]
+BATCH_SIZE ={'celebA':[64, 128],'EG1800':[16,4]}
 NUM_WORKERS = 32
 
-NUM_CLASSES = {'face_seg':[11,11],'celebA':[19,19]}
+NUM_CLASSES = {'face_seg':[11,11],'celebA':[19,19],'EG1800':[2,2]}
 LOW_SCALE = 0.7
 HIGH_SCALE = 1.4
 VAL_SHORTER_SIDE = 400
 VAL_CROP_SIZE = 400
-VAL_BATCH_SIZE = 64
+VAL_BATCH_SIZE = {'celebA':64, 'EG1800':4}
 
 # ENCODER PARAMETERS
 ENC_GRAD_CLIP = 3.
@@ -49,7 +57,7 @@ DEC_AUX_WEIGHT = 0.15 # to disable aux, set to -1
 
 # GENERAL
 FREEZE_BN = [False, False]
-NUM_EPOCHS = 1 #400 #20000
+NUM_EPOCHS = 100 #400 #20000
 NUM_SEGM_EPOCHS = [40, 10] #[20, 8]#task 0(only decoder)for 20,task 1(end to end)for 8
 PRINT_EVERY = 200
 RANDOM_SEED = 9314

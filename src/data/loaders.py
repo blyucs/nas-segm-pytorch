@@ -68,13 +68,13 @@ def create_loaders(args):
                 .format(len(trainset), len(valset), do_search))
     ## Training and validation loaders ##
     train_loader = DataLoader(trainset,
-                              batch_size=args.batch_size[0],
+                              batch_size=BATCH_SIZE[args.dataset_type][0],
                               shuffle=True,
                               num_workers=args.num_workers,
                               pin_memory=True,
                               drop_last=True)
     val_loader = DataLoader(valset,
-                            batch_size=args.val_batch_size,
+                            batch_size=VAL_BATCH_SIZE[args.dataset_type],
                             shuffle=False,
                             num_workers=args.num_workers,
                             pin_memory=True,

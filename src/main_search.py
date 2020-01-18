@@ -51,7 +51,7 @@ def get_arguments():
     """
     parser = argparse.ArgumentParser(description="NAS Search")
 
-    parser.add_argument("--dataset_type", type=str, default='celebA',
+    parser.add_argument("--dataset_type", type=str, default='EG1800',
                         help="dataset type to be trained or valued.")
 
     # Dataset
@@ -71,8 +71,8 @@ def get_arguments():
                         help="Crop size for training,")
     parser.add_argument("--normalise-params", type=list, default=NORMALISE_PARAMS,
                         help="Normalisation parameters [scale, mean, std],")
-    parser.add_argument("--batch-size", type=int, nargs='+', default=BATCH_SIZE,
-                        help="Batch size to train the segmenter model.")
+    # parser.add_argument("--batch-size", type=int, nargs='+', default=BATCH_SIZE,
+    #                     help="Batch size to train the segmenter model.")
     parser.add_argument("--num-workers", type=int, default=NUM_WORKERS,
                         help="Number of workers for pytorch's dataloader.")
     # parser.add_argument("--num-classes", type=int, nargs='+', default=NUM_CLASSES,
@@ -85,10 +85,10 @@ def get_arguments():
     #                     help="Number of images per task0 (trainval)")
     parser.add_argument("--val-shorter-side", type=int, default=VAL_SHORTER_SIDE,
                         help="Shorter side transformation during validation.")
-    parser.add_argument("--val-crop-size", type=int, default=VAL_CROP_SIZE,
+    parser.add_argument("--val-crop-size", type=int, default=VAL_CROP_SIZE, #what's the fxxk
                         help="Crop size for validation.")
-    parser.add_argument("--val-batch-size", type=int, default=VAL_BATCH_SIZE,
-                        help="Batch size to validate the segmenter model.")
+    # parser.add_argument("--val-batch-size", type=int, default=VAL_BATCH_SIZE,
+    #                     help="Batch size to validate the segmenter model.")
 
     # Encoder
     parser.add_argument('--enc-grad-clip', type=float, default=ENC_GRAD_CLIP,
@@ -279,14 +279,14 @@ def main():
 
     # Saver: keeping checkpoint with best validation score (a.k.a best reward)
     now = datetime.datetime.now()
-    args.snapshot_dir = args.snapshot_dir+'search'+"{:%Y%m%dT%H%M}".format(now)
+    args.snapshot_dir = args.snapshot_dir+'_search_'+args.dataset_type+"_{:%Y%m%dT%H%M}".format(now)
 
     saver = Saver(args=vars(args),
                   ckpt_dir=args.snapshot_dir,
                   best_val=best_val,
                   condition=lambda x, y: x > y)
-    seg_saver=seg_Saver(ckpt_dir=args.snapshot_dir,
-                        condition=lambda  x, y:x > y)
+    # seg_saver=seg_Saver(ckpt_dir=args.snapshot_dir,
+    #                     condition=lambda  x, y:x > y)
 
     arch_writer = open('{}/genotypes.out'.format(args.snapshot_dir), 'w')
 
@@ -401,7 +401,7 @@ def main():
             # Save controller params
             saver.save(reward, {'agent': agent.state_dict(), 'epoch': epoch}, logger)
             # save the segmenter params
-            seg_saver.save(reward, segmenter.state_dict(), logger)
+            # seg_saver.save(reward, segmenter.state_dict(), logger)
             # Save genotypes
             epoch_time = (time.time() - start) / \
                 sum(args.num_segm_epochs[:(task_idx + 1)])
@@ -418,9 +418,9 @@ def main():
             encoder = create_encoder()
             segmenter, decoder_config, entropy, log_prob = create_segmenter(encoder)
             del encoder
-        else:
-            # save the segmenter params
-            seg_saver.save(reward, segmenter.state_dict(), logger)
+        # else:
+        #     # save the segmenter params
+        #     seg_saver.save(reward, segmenter.state_dict(), logger)
 
 
 if __name__ == '__main__':

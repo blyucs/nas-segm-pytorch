@@ -47,7 +47,28 @@ logging.basicConfig(level=logging.INFO)
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 cmap = np.load('./utils/cmap.npy')
-SEGMENTER_CKPT_PATH = './ckpt/20200111T1841/segmenter_checkpoint.pth.tar'
+SEGMENTER_CKPT_PATH = \
+    {
+        'celebA':'./ckpt/20200111T1841/segmenter_checkpoint.pth.tar',
+        #'EG1800':'./ckpt/train20200117T1958/segmenter_checkpoint.pth.tar'
+        'EG1800':'./ckpt/train20200118T1128/segmenter_checkpoint.pth.tar'  # 00079,00094,good, the best model currently
+       # 'EG1800':'./ckpt/train20200118T1224/segmenter_checkpoint.pth.tar'
+        #'EG1800':'./ckpt/train20200118T1239/segmenter_checkpoint.pth.tar'
+}
+
+# decoder_config = [[0, [0, 0, 5, 6], [4, 3, 5, 5], [2, 7, 2, 5]], [[3, 3], [2, 3], [4, 0]]]
+# decoder_config = [[5, [0, 0, 5, 1], [4, 0, 8, 7], [6, 3, 3, 2]], [[1, 1], [3, 3], [2, 0]]]
+# decoder_config = [[5, [0, 0, 3, 10], [3, 3, 7, 7], [7, 4, 7, 1]], [[0, 0], [2, 0], [0, 1]]] #0.7035
+# [[1, [1, 1, 5, 9], [2, 1, 9, 1], [3, 6, 1, 9]], [[1, 3], [1, 0], [4, 2]]] #0.7040 (reward)
+# [[6, [0, 1, 2, 5], [0, 2, 5, 3], [6, 5, 1, 10]], [[1, 3], [0, 3], [3, 4]]]  #0.7108 all cls
+# decoder_config = [[1, [0, 0, 6, 0], [0, 3, 8, 3], [3, 0, 6, 3]], [[1, 2], [2, 4], [0, 4]]] #0.7137 all cls
+decoder_config = \
+    {
+        'celebA':[[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2]]],  # 0.803
+        'EG1800':[[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]] #0.9636 EG1800
+    }
+# decoder_config = [[10, [1, 0, 8, 10], [0, 1, 3, 2], [7, 1, 4, 3]], [[3, 0], [3, 4], [3, 2]]] #0.095 worst all cls
+# [[10, [1, 1, 5, 2], [3, 0, 3, 4], [6, 7, 5, 9]], [[0, 0], [4, 3], [3, 1]]] #0.1293 all cls
 def get_arguments():
     """Parse all the arguments provided from the CLI.
 
@@ -56,15 +77,18 @@ def get_arguments():
     """
     parser = argparse.ArgumentParser(description="NAS Search")
 
+    parser.add_argument("--dataset_type", type=str, default='EG1800',#'EG1800',
+                        help="dataset type to be trained or valued.")
+
     # Dataset
-    parser.add_argument("--train-dir", type=str, default=TRAIN_DIR,
-                        help="Path to the training set directory.")
-    parser.add_argument("--val-dir", type=str, default=VAL_DIR,
-                        help="Path to the validation set directory.")
-    parser.add_argument("--train-list", type=str, default=TRAIN_LIST,
-                        help="Path to the training set list.")
-    parser.add_argument("--val-list", type=str, default=VAL_LIST,
-                        help="Path to the validation set list.")
+    # parser.add_argument("--train-dir", type=str, default=TRAIN_DIR,
+    #                     help="Path to the training set directory.")
+    # parser.add_argument("--val-dir", type=str, default=VAL_DIR,
+    #                     help="Path to the validation set directory.")
+    # parser.add_argument("--train-list", type=str, default=TRAIN_LIST,
+    #                     help="Path to the training set list.")
+    # parser.add_argument("--val-list", type=str, default=VAL_LIST,
+    #                     help="Path to the validation set list.")
     parser.add_argument("--meta-train-prct", type=int, default=META_TRAIN_PRCT,
                         help="Percentage of examples for meta-training set.")
     parser.add_argument("--shorter-side", type=int, nargs='+', default=SHORTER_SIDE,
@@ -77,14 +101,14 @@ def get_arguments():
                         help="Batch size to train the segmenter model.")
     parser.add_argument("--num-workers", type=int, default=NUM_WORKERS,
                         help="Number of workers for pytorch's dataloader.")
-    parser.add_argument("--num-classes", type=int, nargs='+', default=NUM_CLASSES,
-                        help="Number of output classes for each task.")
+    # parser.add_argument("--num-classes", type=int, nargs='+', default=NUM_CLASSES,
+    #                     help="Number of output classes for each task.")
     parser.add_argument("--low-scale", type=float, default=LOW_SCALE,
                         help="Lower bound for random scale")
     parser.add_argument("--high-scale", type=float, default=HIGH_SCALE,
                         help="Upper bound for random scale")
-    parser.add_argument("--n-task0", type=int, default=N_TASK0,
-                        help="Number of images per task0 (trainval)")
+    # parser.add_argument("--n-task0", type=int, default=N_TASK0,
+    #                     help="Number of images per task0 (trainval)")
     parser.add_argument("--val-shorter-side", type=int, default=VAL_SHORTER_SIDE,
                         help="Shorter side transformation during validation.")
     parser.add_argument("--val-crop-size", type=int, default=VAL_CROP_SIZE,
@@ -158,15 +182,15 @@ class Segmenter(nn.Module):
 
 
 color_list = [[0, 0, 0], [204, 0, 0], [76, 153, 0], [204, 204, 0], [51, 51, 255], [204, 0, 204], [0, 255, 255], [255, 204, 204], [102, 51, 0], [255, 0, 0], [102, 204, 0], [255, 255, 0], [0, 0, 153], [0, 0, 204], [255, 51, 153], [0, 204, 204], [0, 51, 0], [255, 153, 51], [0, 204, 0]]
-imgs = [
+'''imgs = [
     '../examples/face_test_img/2345.jpg',
     '../examples/face_test_img/3456.jpg',
     '../examples/face_test_img/6789.jpg',
-]
+]'''
 
-TEST_IMG_PATH = '../data/datasets/celebA'
-RAW_IMAGE_PATH = 'CelebA-HA-img-resize'
-MASK_IMAGE_PATH = 'CelebAMask-HQ-mask'
+TEST_IMG_PATH = {'celebA':'../data/datasets/celebA','EG1800':'../data/datasets/portrait_seg/EG1800'}
+RAW_IMAGE_PATH = {'celebA':'CelebA-HA-img-resize','EG1800':'Images'}
+MASK_IMAGE_PATH = {'celebA':'CelebAMask-HQ-mask','EG1800':'Labels'}
 def main():
     # Set-up experiment
     args = get_arguments()
@@ -177,7 +201,7 @@ def main():
     #     os.makedirs(dir_name)
     # arch_writer = open('{}/genotypes.out'.format(dir_name), 'w')
     logger.info(" Running Experiment {}".format(exp_name))
-    args.num_tasks = len(args.num_classes)
+    args.num_tasks = len(NUM_CLASSES[args.dataset_type])
     segm_crit = nn.NLLLoss2d(ignore_index=255).cuda()
 
     # Set-up random seeds
@@ -195,18 +219,10 @@ def main():
         with torch.no_grad():
             #decoder_config, entropy, log_prob = agent.controller.sample()
             #stub the decoder arch
-            #decoder_config = [[0, [0, 0, 5, 6], [4, 3, 5, 5], [2, 7, 2, 5]], [[3, 3], [2, 3], [4, 0]]]
-            #decoder_config = [[5, [0, 0, 5, 1], [4, 0, 8, 7], [6, 3, 3, 2]], [[1, 1], [3, 3], [2, 0]]]
-            #decoder_config = [[5, [0, 0, 3, 10], [3, 3, 7, 7], [7, 4, 7, 1]], [[0, 0], [2, 0], [0, 1]]] #0.7035
-            #[[1, [1, 1, 5, 9], [2, 1, 9, 1], [3, 6, 1, 9]], [[1, 3], [1, 0], [4, 2]]] #0.7040 (reward)
-            #[[6, [0, 1, 2, 5], [0, 2, 5, 3], [6, 5, 1, 10]], [[1, 3], [0, 3], [3, 4]]]  #0.7108 all cls
-            #decoder_config = [[1, [0, 0, 6, 0], [0, 3, 8, 3], [3, 0, 6, 3]], [[1, 2], [2, 4], [0, 4]]] #0.7137 all cls
-            decoder_config = [[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2]]] #0.803
-            #decoder_config = [[10, [1, 0, 8, 10], [0, 1, 3, 2], [7, 1, 4, 3]], [[3, 0], [3, 4], [3, 2]]] #0.095 worst all cls
-            # [[10, [1, 1, 5, 2], [3, 0, 3, 4], [6, 7, 5, 9]], [[0, 0], [4, 3], [3, 1]]] #0.1293 all cls
+
             decoder = Decoder(inp_sizes=encoder.out_sizes,
-                              num_classes=args.num_classes[0],
-                              config=decoder_config,
+                              num_classes=NUM_CLASSES[args.dataset_type][0],
+                              config=decoder_config[args.dataset_type],
                               agg_size=args.agg_cell_size,
                               aux_cell=args.aux_cell,
                               repeats=args.sep_repeats)
@@ -223,7 +239,7 @@ def main():
     del encoder
 
     #NUM_CLASSES = [17, 17]
-    segmenter.load_state_dict(torch.load(args.ckpt_path))
+    segmenter.load_state_dict(torch.load(args.ckpt_path[args.dataset_type]))
     logger.info(" Loaded Encoder with #TOTAL PARAMS={:3.2f}M"
                 .format(compute_params(segmenter)[0] / 1e6))
 
@@ -234,8 +250,15 @@ def main():
     ax= axes.ravel()
     color_array = np.array(color_list)
     random.seed()
-    #imgs = [os.path.join(TEST_IMG_PATH,RAW_IMAGE_PATH,'{}.jpg'.format(random.randint(0,30000))) for i in range(TEST_NUM)]
-    #msks = [imgs[i].replace(RAW_IMAGE_PATH,MASK_IMAGE_PATH).replace('jpg','png') for i in range(TEST_NUM)]
+
+    if(args.dataset_type == 'celebA'):
+        imgs = [os.path.join(TEST_IMG_PATH['celebA'],RAW_IMAGE_PATH['celebA'],'{}.jpg'.format(random.randint(0,30000))) for i in range(TEST_NUM)]
+        msks = [imgs[i].replace(RAW_IMAGE_PATH['celebA'],MASK_IMAGE_PATH['celebA']).replace('jpg','png') for i in range(TEST_NUM)]
+    elif(args.dataset_type == 'EG1800'):
+        imgs = [os.path.join(TEST_IMG_PATH['EG1800'],RAW_IMAGE_PATH['EG1800'],'{}'.format(random.randint(0,100)).rjust(5,'0')+'.png') for i in range(TEST_NUM)]
+        msks = [imgs[i].replace(RAW_IMAGE_PATH['EG1800'],MASK_IMAGE_PATH['EG1800']) for i in range(TEST_NUM)]
+
+    '''
     imgs = [
         '../data/datasets/face_seg_dataset/rawimage/212409770_1.jpg',
 
@@ -245,10 +268,12 @@ def main():
         '../data/datasets/face_seg_dataset/class_labels/212409770_1.png',
         '../data/datasets/face_seg_dataset/class_labels/114226877_1.png'
     ]
+    '''
     for i,img_path in enumerate(imgs):
+        logger.info("Testing image:{}".format(img_path))
         img = np.array(Image.open(img_path))
-        # msk = color_array[np.array(Image.open(img_path.replace('jpg', 'png')))]
-        msk = color_array[np.array(Image.open(msks[i]))]
+        msk = np.array(Image.open(msks[i]))
+        msk = color_array[msk]
         orig_size = img.shape[:2][::-1]
         ax[3*i].imshow(img,aspect='auto')
         ax[3*i+1].imshow(msk,aspect='auto')

@@ -20,6 +20,7 @@ import logging
 import os
 import random
 import time
+import json
 import numpy as np
 import sys
 # pytorch libs
@@ -41,7 +42,7 @@ from utils.solvers import create_optimisers
 
 os.environ["CUDA_VISIBLE_DEVICES"]="0,1,2,3"
 logging.basicConfig(level=logging.INFO)
-
+TRAIN_EPOCH_NUM = {'celebA':[40,10],'EG1800':[0,50]}
 def get_arguments():
     """Parse all the arguments provided from the CLI.
 
@@ -50,7 +51,7 @@ def get_arguments():
     """
     parser = argparse.ArgumentParser(description="NAS Search")
 
-    parser.add_argument("--dataset_type", type=str, default='celebA',
+    parser.add_argument("--dataset_type", type=str, default='EG1800',
                         help="dataset type to be trained or valued.")
 
     # Dataset
@@ -223,8 +224,8 @@ def main():
             # decoder_config = [[1, [0, 0, 6, 0], [0, 3, 8, 3], [3, 0, 6, 3]], [[1, 2], [2, 4], [0, 4]]] #0.7137 all cls
             # decoder_config = [[10, [1, 0, 8, 10], [0, 1, 3, 2], [7, 1, 4, 3]], [[3, 0], [3, 4], [3, 2]]] #0.095 worst all cls
             # [[10, [1, 1, 5, 2], [3, 0, 3, 4], [6, 7, 5, 9]], [[0, 0], [4, 3], [3, 1]]] #0.1293 all cls
-            decoder_config = [[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2]]] # 0.7816 reward
-
+            #decoder_config = [[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2]]] # 0.7816 reward
+            decoder_config = [[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]] #0.9636 EG1800
             decoder = Decoder(inp_sizes=encoder.out_sizes,
                               num_classes=NUM_CLASSES[args.dataset_type][0],
                               config=decoder_config,
@@ -248,7 +249,7 @@ def main():
 
     # Initialise task performance measurers
     task_ps = [[TaskPerformer(maxval=0.01, delta=0.9)
-                for _ in range(args.num_segm_epochs[idx] // args.val_every[idx])]
+                for _ in range(TRAIN_EPOCH_NUM[args.dataset_type][idx] // args.val_every[idx])]
                for idx, _ in enumerate(range(args.num_tasks))]
 
     # Restore from previous checkpoint if any
@@ -257,8 +258,8 @@ def main():
 
     # Saver: keeping checkpoint with best validation score (a.k.a best reward)
     now = datetime.datetime.now()
-    args.snapshot_dir = args.snapshot_dir+'train'+"{:%Y%m%dT%H%M}".format(now)
 
+    args.snapshot_dir = args.snapshot_dir+'_train_'+args.dataset_type+"_{:%Y%m%dT%H%M}".format(now)
     # saver = Saver(args=vars(args),
     #               ckpt_dir=args.snapshot_dir,
     #               best_val=best_val,
@@ -267,6 +268,10 @@ def main():
                         condition=lambda  x, y:x > y)
 
     # arch_writer = open('{}/genotypes.out'.format(args.snapshot_dir), 'w')
+
+    with open('{}/args.json'.format(args.snapshot_dir), 'w') as f:
+        json.dump({k: v for k, v in args.items() if isinstance(v, (int, float, str))}, f,
+                  sort_keys=True, indent=4, ensure_ascii=False)
 
     logger.info(" Pre-computing data for task0")
     kd_net = None# stub the kd
@@ -281,7 +286,7 @@ def main():
         # 	break
         torch.cuda.empty_cache()
         # Change dataloader
-        train_loader.batch_sampler.batch_size = args.batch_size[task_idx]
+        train_loader.batch_sampler.batch_size = BATCH_SIZE[args.dataset_type][task_idx]
         # for loader in [train_loader, val_loader]:
         #     try:
         #         loader.dataset.set_config(crop_size=args.crop_size[task_idx],
@@ -308,7 +313,7 @@ def main():
         avg_param = init_polyak(
             args.do_polyak, segmenter.module.decoder if task_idx == 0 else segmenter)
         kd_crit = None #stub the kd
-        for epoch_segm in range(args.num_segm_epochs[task_idx]): #[5,1] [20,8]
+        for epoch_segm in range(TRAIN_EPOCH_NUM[args.dataset_type][task_idx]): #[5,1] [20,8]
             if task_idx == 0:
                 train_task0(Xy_train, #train the decoder once
                             segmenter,
@@ -316,7 +321,7 @@ def main():
                             epoch_segm,#[5,1]
                             segm_crit,
                             kd_crit,
-                            args.batch_size[0],
+                            BATCH_SIZE[args.dataset_type][0],
                             args.freeze_bn[0],
                             args.do_kd,
                             args.kd_coeff,
@@ -361,9 +366,9 @@ def main():
                     logger.info(" Interrupting")
                     stop = True
                     break
-        reward = task_miou  # will be used in train_agent process
+                #reward = task_miou  # will be used in train_agent process
         # save the segmenter params
-        seg_saver.save(reward, segmenter.state_dict(), logger)
+    seg_saver.save(task_miou, segmenter.state_dict(), logger)
 
 
 if __name__ == '__main__':
