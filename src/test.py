@@ -51,10 +51,11 @@ SEGMENTER_CKPT_PATH = \
     {
         'celebA':'./ckpt/20200111T1841/segmenter_checkpoint.pth.tar',
         #'EG1800':'./ckpt/train20200117T1958/segmenter_checkpoint.pth.tar'
-        'EG1800':'./ckpt/train20200118T1128/segmenter_checkpoint.pth.tar'  # 00079,00094,good, the best model currently
+        'EG1800':'./ckpt/train20200118T1128/segmenter_checkpoint.pth.tar' , # 00079,00094,good, the best model currently
        # 'EG1800':'./ckpt/train20200118T1224/segmenter_checkpoint.pth.tar'
         #'EG1800':'./ckpt/train20200118T1239/segmenter_checkpoint.pth.tar'
-}
+        'celebA-binary': './ckpt/_train_celebA-binary_20200118T1645/segmenter_checkpoint.pth.tar',# 00079,00094,good, the best model currently
+    }
 
 # decoder_config = [[0, [0, 0, 5, 6], [4, 3, 5, 5], [2, 7, 2, 5]], [[3, 3], [2, 3], [4, 0]]]
 # decoder_config = [[5, [0, 0, 5, 1], [4, 0, 8, 7], [6, 3, 3, 2]], [[1, 1], [3, 3], [2, 0]]]
@@ -65,7 +66,8 @@ SEGMENTER_CKPT_PATH = \
 decoder_config = \
     {
         'celebA':[[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2]]],  # 0.803
-        'EG1800':[[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]] #0.9636 EG1800
+        'EG1800':[[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]], #0.9636 EG1800
+        'celebA-binary':[[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]] #0.9636 EG1800:
     }
 # decoder_config = [[10, [1, 0, 8, 10], [0, 1, 3, 2], [7, 1, 4, 3]], [[3, 0], [3, 4], [3, 2]]] #0.095 worst all cls
 # [[10, [1, 1, 5, 2], [3, 0, 3, 4], [6, 7, 5, 9]], [[0, 0], [4, 3], [3, 1]]] #0.1293 all cls
@@ -77,7 +79,7 @@ def get_arguments():
     """
     parser = argparse.ArgumentParser(description="NAS Search")
 
-    parser.add_argument("--dataset_type", type=str, default='EG1800',#'EG1800',
+    parser.add_argument("--dataset_type", type=str, default='celebA-binary',#'EG1800',
                         help="dataset type to be trained or valued.")
 
     # Dataset
@@ -251,10 +253,10 @@ def main():
     color_array = np.array(color_list)
     random.seed()
 
-    if(args.dataset_type == 'celebA'):
+    if args.dataset_type == 'celebA' or args.dataset_type == 'celebA-binary':
         imgs = [os.path.join(TEST_IMG_PATH['celebA'],RAW_IMAGE_PATH['celebA'],'{}.jpg'.format(random.randint(0,30000))) for i in range(TEST_NUM)]
         msks = [imgs[i].replace(RAW_IMAGE_PATH['celebA'],MASK_IMAGE_PATH['celebA']).replace('jpg','png') for i in range(TEST_NUM)]
-    elif(args.dataset_type == 'EG1800'):
+    elif args.dataset_type == 'EG1800' :#or args.dataset_type == 'celebA-binary':
         imgs = [os.path.join(TEST_IMG_PATH['EG1800'],RAW_IMAGE_PATH['EG1800'],'{}'.format(random.randint(0,100)).rjust(5,'0')+'.png') for i in range(TEST_NUM)]
         msks = [imgs[i].replace(RAW_IMAGE_PATH['EG1800'],MASK_IMAGE_PATH['EG1800']) for i in range(TEST_NUM)]
 

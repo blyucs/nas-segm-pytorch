@@ -51,7 +51,7 @@ def get_arguments():
     """
     parser = argparse.ArgumentParser(description="NAS Search")
 
-    parser.add_argument("--dataset_type", type=str, default='EG1800',
+    parser.add_argument("--dataset_type", type=str, default='celebA',
                         help="dataset type to be trained or valued.")
 
     # Dataset
@@ -309,7 +309,7 @@ def main():
                 break
             torch.cuda.empty_cache()
             # Change dataloader
-            train_loader.batch_sampler.batch_size = args.batch_size[task_idx]
+            train_loader.batch_sampler.batch_size = BATCH_SIZE[args.dataset_type][task_idx]
             # for loader in [train_loader, val_loader]:
             #     try:
             #         loader.dataset.set_config(crop_size=args.crop_size[task_idx],
@@ -344,7 +344,7 @@ def main():
                                 epoch_segm,#[5,1]
                                 segm_crit,
                                 kd_crit,
-                                args.batch_size[0],
+                                BATCH_SIZE[args.dataset_type][0],
                                 args.freeze_bn[0],
                                 args.do_kd,
                                 args.kd_coeff,

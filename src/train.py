@@ -42,7 +42,7 @@ from utils.solvers import create_optimisers
 
 os.environ["CUDA_VISIBLE_DEVICES"]="0,1,2,3"
 logging.basicConfig(level=logging.INFO)
-TRAIN_EPOCH_NUM = {'celebA':[40,10],'EG1800':[0,50]}
+TRAIN_EPOCH_NUM = {'celebA':[40,10],'EG1800':[0,50],'celebA-binary':[0,6]}
 def get_arguments():
     """Parse all the arguments provided from the CLI.
 
@@ -51,7 +51,7 @@ def get_arguments():
     """
     parser = argparse.ArgumentParser(description="NAS Search")
 
-    parser.add_argument("--dataset_type", type=str, default='EG1800',
+    parser.add_argument("--dataset_type", type=str, default='celebA-binary',
                         help="dataset type to be trained or valued.")
 
     # Dataset
@@ -71,8 +71,8 @@ def get_arguments():
                         help="Crop size for training,")
     parser.add_argument("--normalise-params", type=list, default=NORMALISE_PARAMS,
                         help="Normalisation parameters [scale, mean, std],")
-    parser.add_argument("--batch-size", type=int, nargs='+', default=BATCH_SIZE,
-                        help="Batch size to train the segmenter model.")
+    # parser.add_argument("--batch-size", type=int, nargs='+', default=BATCH_SIZE,
+    #                     help="Batch size to train the segmenter model.")
     parser.add_argument("--num-workers", type=int, default=NUM_WORKERS,
                         help="Number of workers for pytorch's dataloader.")
     # parser.add_argument("--num-classes", type=int, nargs='+', default=NUM_CLASSES,
@@ -87,8 +87,8 @@ def get_arguments():
                         help="Shorter side transformation during validation.")
     parser.add_argument("--val-crop-size", type=int, default=VAL_CROP_SIZE,
                         help="Crop size for validation.")
-    parser.add_argument("--val-batch-size", type=int, default=VAL_BATCH_SIZE,
-                        help="Batch size to validate the segmenter model.")
+    # parser.add_argument("--val-batch-size", type=int, default=VAL_BATCH_SIZE,
+    #                     help="Batch size to validate the segmenter model.")
 
     # Encoder
     parser.add_argument('--enc-grad-clip', type=float, default=ENC_GRAD_CLIP,
@@ -105,8 +105,8 @@ def get_arguments():
                         help='Whether to keep batch norm statistics intact.')
     parser.add_argument("--num-epochs", type=int, default=NUM_EPOCHS,
                         help='Number of epochs to train for the controller.')
-    parser.add_argument("--num-segm-epochs", type=int, nargs='+', default=NUM_SEGM_EPOCHS,
-                        help='Number of epochs to train for each sampled network.')
+    # parser.add_argument("--num-segm-epochs", type=int, nargs='+', default=NUM_SEGM_EPOCHS,
+    #                     help='Number of epochs to train for each sampled network.')
     parser.add_argument("--print-every", type=int, default=PRINT_EVERY,
                         help='Print information every often.')
     parser.add_argument("--random-seed", type=int, default=RANDOM_SEED,
@@ -269,9 +269,9 @@ def main():
 
     # arch_writer = open('{}/genotypes.out'.format(args.snapshot_dir), 'w')
 
-    with open('{}/args.json'.format(args.snapshot_dir), 'w') as f:
-        json.dump({k: v for k, v in args.items() if isinstance(v, (int, float, str))}, f,
-                  sort_keys=True, indent=4, ensure_ascii=False)
+    # with open('{}/args.json'.format(args.snapshot_dir), 'w') as f:
+    #     json.dump({k: v for k, v in args.items() if isinstance(v, (int, float, str))}, f,
+    #               sort_keys=True, indent=4, ensure_ascii=False)
 
     logger.info(" Pre-computing data for task0")
     kd_net = None# stub the kd
@@ -348,7 +348,8 @@ def main():
             apply_polyak(args.do_polyak,
                          segmenter.module.decoder if task_idx == 0 else segmenter,
                          avg_param)
-            if (epoch_segm + 1) % (args.val_every[task_idx]) == 0:
+            #if (epoch_segm + 1) % (args.val_every[task_idx]) == 0:
+            if False:
                 logger.info(
                     " Validating Segmenter, Epoch {}, Task {}"
                         .format(str(9876), str(task_idx)))
@@ -368,7 +369,7 @@ def main():
                     break
                 #reward = task_miou  # will be used in train_agent process
         # save the segmenter params
-    seg_saver.save(task_miou, segmenter.state_dict(), logger)
+    seg_saver.save(1, segmenter.state_dict(), logger) #stub to 1
 
 
 if __name__ == '__main__':
