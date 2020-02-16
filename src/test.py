@@ -54,7 +54,7 @@ SEGMENTER_CKPT_PATH = \
         'EG1800':'./ckpt/train20200118T1128/segmenter_checkpoint.pth.tar' , # 00079,00094,good, the best model currently
        # 'EG1800':'./ckpt/train20200118T1224/segmenter_checkpoint.pth.tar'
         #'EG1800':'./ckpt/train20200118T1239/segmenter_checkpoint.pth.tar'
-        'celebA-binary': './ckpt/_train_celebA-binary_20200118T1645/segmenter_checkpoint.pth.tar',# 00079,00094,good, the best model currently
+        'celebA-binary': './ckpt/_train_celebA-binary_20200118T1715/segmenter_checkpoint.pth.tar',# 00079,00094,good, the best model currently
     }
 
 # decoder_config = [[0, [0, 0, 5, 6], [4, 3, 5, 5], [2, 7, 2, 5]], [[3, 3], [2, 3], [4, 0]]]
@@ -253,10 +253,10 @@ def main():
     color_array = np.array(color_list)
     random.seed()
 
-    if args.dataset_type == 'celebA' or args.dataset_type == 'celebA-binary':
+    if args.dataset_type == 'celebA' :#or args.dataset_type == 'celebA-binary':
         imgs = [os.path.join(TEST_IMG_PATH['celebA'],RAW_IMAGE_PATH['celebA'],'{}.jpg'.format(random.randint(0,30000))) for i in range(TEST_NUM)]
         msks = [imgs[i].replace(RAW_IMAGE_PATH['celebA'],MASK_IMAGE_PATH['celebA']).replace('jpg','png') for i in range(TEST_NUM)]
-    elif args.dataset_type == 'EG1800' :#or args.dataset_type == 'celebA-binary':
+    elif args.dataset_type == 'EG1800' or args.dataset_type == 'celebA-binary':
         imgs = [os.path.join(TEST_IMG_PATH['EG1800'],RAW_IMAGE_PATH['EG1800'],'{}'.format(random.randint(0,100)).rjust(5,'0')+'.png') for i in range(TEST_NUM)]
         msks = [imgs[i].replace(RAW_IMAGE_PATH['EG1800'],MASK_IMAGE_PATH['EG1800']) for i in range(TEST_NUM)]
 
