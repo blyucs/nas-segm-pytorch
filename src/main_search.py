@@ -113,8 +113,8 @@ def get_arguments():
                         help='Seed to provide (near-)reproducibility.')
     parser.add_argument("--snapshot-dir", type=str, default=SNAPSHOT_DIR,
                         help="Path to directory for storing checkpoints.")
-    parser.add_argument("--ckpt-path", type=str, default=CKPT_PATH,
-                        help="Path to the checkpoint file.")
+    # parser.add_argument("--ckpt-path", type=str, default=CKPT_PATH,
+    #                     help="Path to the checkpoint file.")
     parser.add_argument("--val-every", nargs='+', type=int, default=VAL_EVERY,
                         help="How often to validate current architecture.")
     parser.add_argument("--summary-dir", type=str, default=SUMMARY_DIR,

@@ -42,7 +42,6 @@ from utils.solvers import create_optimisers
 
 os.environ["CUDA_VISIBLE_DEVICES"]="0,1,2,3"
 logging.basicConfig(level=logging.INFO)
-TRAIN_EPOCH_NUM = {'celebA':[40,10],'EG1800':[0,50],'celebA-binary':[0,6]}
 def get_arguments():
     """Parse all the arguments provided from the CLI.
 
@@ -51,7 +50,7 @@ def get_arguments():
     """
     parser = argparse.ArgumentParser(description="NAS Search")
 
-    parser.add_argument("--dataset_type", type=str, default='celebA-binary',
+    parser.add_argument("--dataset_type", type=str, default= 'EG1800',#'celebA-binary',
                         help="dataset type to be trained or valued.")
 
     # Dataset
@@ -113,8 +112,8 @@ def get_arguments():
                         help='Seed to provide (near-)reproducibility.')
     parser.add_argument("--snapshot-dir", type=str, default=SNAPSHOT_DIR,
                         help="Path to directory for storing checkpoints.")
-    parser.add_argument("--ckpt-path", type=str, default=CKPT_PATH,
-                        help="Path to the checkpoint file.")
+    # parser.add_argument("--ckpt-path", type=str, default=CKPT_PATH,
+    #                     help="Path to the checkpoint file.")
     parser.add_argument("--val-every", nargs='+', type=int, default=VAL_EVERY,
                         help="How often to validate current architecture.")
     parser.add_argument("--summary-dir", type=str, default=SUMMARY_DIR,
@@ -226,12 +225,14 @@ def main():
             # [[10, [1, 1, 5, 2], [3, 0, 3, 4], [6, 7, 5, 9]], [[0, 0], [4, 3], [3, 1]]] #0.1293 all cls
             #decoder_config = [[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2]]] # 0.7816 reward
             decoder_config = [[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]] #0.9636 EG1800
+            #decoder_config = [[1, [1, 0, 3, 9], [2, 3, 4, 9], [2, 1, 1, 1]], [[1, 3], [2, 0], [0, 3]]]  #0.9636 EG1800
+            #decoder_config = [[2, [1, 0, 10, 8], [2, 3, 1, 8], [2, 1, 2, 2]], [[3, 1], [2, 4], [5, 5]]]
             decoder = Decoder(inp_sizes=encoder.out_sizes,
-                              num_classes=NUM_CLASSES[args.dataset_type][0],
-                              config=decoder_config,
-                              agg_size=48,   #args.agg_cell_size, what's the fxxk
-                              aux_cell=True,  #args.aux_cell,
-                              repeats=1)#args.sep_repeats)
+                                          num_classes=NUM_CLASSES[args.dataset_type][0],
+                                          config=decoder_config,
+                                          agg_size=48,   #args.agg_cell_size, what's the fxxk
+                                          aux_cell=True,  #args.aux_cell,
+                                          repeats=1)#args.sep_repeats)
 
         # Fuse encoder and decoder
         segmenter = nn.DataParallel(Segmenter(encoder, decoder)).cuda()
@@ -243,6 +244,14 @@ def main():
     # Sample first configuration
     segmenter, decoder_config, = create_segmenter(encoder)
     del encoder
+
+    # finetune_ckpt_path = './ckpt/_train_celebA-binary_20200118T1715/segmenter_checkpoint.pth.tar'
+    # finetune_ckpt_path = './ckpt/_train_EG1800_20200217T1922/segmenter_checkpoint.pth.tar'
+    #finetune_ckpt_path = './ckpt/_train_EG1800_20200218T1319/segmenter_checkpoint.pth.tar'
+    finetune_ckpt_path = './ckpt/_train_EG1800_20200218T2034/segmenter_checkpoint.pth.tar'
+    segmenter.load_state_dict(torch.load(finetune_ckpt_path))
+    logger.info(" Loaded Encoder with #TOTAL PARAMS={:3.2f}M"
+                .format(compute_params(segmenter)[0] / 1e6))
 
     # Create dataloaders
     train_loader, val_loader, do_search = create_loaders(args)
@@ -267,7 +276,11 @@ def main():
     seg_saver=seg_Saver(ckpt_dir=args.snapshot_dir,
                         condition=lambda  x, y:x > y)
 
-    # arch_writer = open('{}/genotypes.out'.format(args.snapshot_dir), 'w')
+    arch_writer = open('{}/genotypes.out'.format(args.snapshot_dir), 'w')
+    arch_writer.write(
+        'genotype: {}\n'
+            .format(decoder_config))
+    arch_writer.flush()
 
     # with open('{}/args.json'.format(args.snapshot_dir), 'w') as f:
     #     json.dump({k: v for k, v in args.items() if isinstance(v, (int, float, str))}, f,

@@ -1,4 +1,4 @@
-"""Main file for test.
+"""Main file for search.
 
 KD from RefineNet-Light-Weight-152 (args.do_kd => keep in memory):
   Task0 - pre-computed
@@ -20,6 +20,7 @@ import logging
 import os
 import random
 import time
+import json
 import numpy as np
 import sys
 # pytorch libs
@@ -31,42 +32,40 @@ from data.loaders import create_loaders
 from engine.inference import validate
 from engine.trainer import populate_task0, train_task0, train_segmenter
 from helpers.utils import apply_polyak, compute_params, init_polyak, load_ckpt, \
-                          Saver, TaskPerformer, seg_Saver
+    Saver, TaskPerformer, seg_Saver
 from nn.encoders import create_encoder
 from nn.micro_decoders import MicroDecoder as Decoder
 from rl.agent import create_agent, train_agent
 from utils.default_args import *
 from utils.solvers import create_optimisers
-from PIL import  Image
-import cv2
-import matplotlib.pyplot as plt
 
-from utils.helpers import prepare_img
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
+
+os.environ["CUDA_VISIBLE_DEVICES"]="0,1,2,3"
 logging.basicConfig(level=logging.INFO)
+# TRAIN_EPOCH_NUM = {'celebA':[40,10],'EG1800':[0,50],'celebA-binary':[0,6]}
 
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
-cmap = np.load('./utils/cmap.npy')
 SEGMENTER_CKPT_PATH = \
     {
         'celebA':'./ckpt/20200111T1841/segmenter_checkpoint.pth.tar',
         #'EG1800':'./ckpt/train20200117T1958/segmenter_checkpoint.pth.tar'
-        #'EG1800':'./ckpt/train20200118T1128/segmenter_checkpoint.pth.tar' , # 00079,00094,good, the best model currently
-        #'EG1800': './ckpt/_train_EG1800_20200217T1059/segmenter_checkpoint.pth.tar',
-        #'EG1800': './ckpt/_train_EG1800_20200217T1405/segmenter_checkpoint.pth.tar',
-        # 'EG1800':'./ckpt/train20200118T1224/segmenter_checkpoint.pth.tar'
+        #'EG1800':'./ckpt/train20200118T1128/segmenter_checkpoint.pth.tar' , # MIOU 0.924 in EG1800, currently best(0217)
+
+        #'EG1800': './ckpt/_train_celebA-binary_20200118T1715/segmenter_checkpoint.pth.tar', #MIOU 0.976 in cele-binary ,currently best(0217)
+        #'EG1800':'./ckpt/_train_EG1800_20200217T1059/segmenter_checkpoint.pth.tar',
+        #'EG1800':'./ckpt/train20200118T1224/segmenter_checkpoint.pth.tar'
         #'EG1800':'./ckpt/train20200118T1239/segmenter_checkpoint.pth.tar'
-        #'EG1800': './ckpt/_train_celebA-binary_20200118T1715/segmenter_checkpoint.pth.tar',# 00079,00094,good, the best model currently
-        # 'celebA-binary': './ckpt/_train_celebA-binary_20200118T1715/segmenter_checkpoint.pth.tar',# 00079,00094,good, the best model currently
-        #'EG1800': './ckpt/_train_EG1800_20200217T1922/segmenter_checkpoint.pth.tar',
+        #'EG1800': './ckpt/_train_EG1800_20200217T1405/segmenter_checkpoint.pth.tar',# [2,[1,0,10,8]]
+        # 'celebA-binary': './ckpt/_train_celebA-binary_20200118T1715/segmenter_checkpoint.pth.tar', #MIOU 0.976 in cele-binary ,0.944 in EG1800,currently best(0217)
+        # 'EG1800': './ckpt/_train_EG1800_20200217T1922/segmenter_checkpoint.pth.tar',
         'celebA-binary': './ckpt/_train_EG1800_20200217T1922/segmenter_checkpoint.pth.tar',
         #'EG1800': './ckpt/_train_EG1800_20200217T2216/segmenter_checkpoint.pth.tar',
-        # 'EG1800': './ckpt/_train_EG1800_20200218T1319/segmenter_checkpoint.pth.tar', #0.966
+
+        # 'EG1800': './ckpt/_train_EG1800_20200218T1319/segmenter_checkpoint.pth.tar',
         # 'EG1800': './ckpt/_train_EG1800_20200218T1503/segmenter_checkpoint.pth.tar',
-        #'EG1800': './ckpt/_train_EG1800_20200218T1606/segmenter_checkpoint.pth.tar',
+        # 'EG1800': './ckpt/_train_EG1800_20200218T1606/segmenter_checkpoint.pth.tar',
         # 'EG1800': './ckpt/_train_EG1800_20200218T1842/segmenter_checkpoint.pth.tar',
-        # 'EG1800': './ckpt/_train_EG1800_20200218T2034/segmenter_checkpoint.pth.tar',  #0.967
-        'EG1800': './ckpt/_train_EG1800_20200218T2158/segmenter_checkpoint.pth.tar',  #0.873
+        # 'EG1800': './ckpt/_train_EG1800_20200218T2034/segmenter_checkpoint.pth.tar', #0.967
+        'EG1800': './ckpt/_train_EG1800_20200218T2158/segmenter_checkpoint.pth.tar',  # 0.873
     }
 
 # decoder_config = [[0, [0, 0, 5, 6], [4, 3, 5, 5], [2, 7, 2, 5]], [[3, 3], [2, 3], [4, 0]]]
@@ -78,13 +77,14 @@ SEGMENTER_CKPT_PATH = \
 decoder_config = \
     {
         'celebA':[[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2]]],  # 0.803
-        #'EG1800':[[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]], #0.9636 EG1800
-        # 'EG1800': [[2, [1, 0, 10, 8], [2, 3, 1, 8], [2, 1, 2, 2]], [[3, 1], [2, 4], [5, 5]]],
-        'EG1800':[[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]], #0.9636 EG1800:
-        'celebA-binary':[[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]] #0.9636 EG1800:
+        'EG1800':[[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]], #0.924
+        #'EG1800': [[2, [1, 0, 10, 8], [2, 3, 1, 8], [2, 1, 2, 2]], [[3, 1], [2, 4], [5, 5]]],
+        'celebA-binary':[[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]] #0.976
     }
 # decoder_config = [[10, [1, 0, 8, 10], [0, 1, 3, 2], [7, 1, 4, 3]], [[3, 0], [3, 4], [3, 2]]] #0.095 worst all cls
 # [[10, [1, 1, 5, 2], [3, 0, 3, 4], [6, 7, 5, 9]], [[0, 0], [4, 3], [3, 1]]] #0.1293 all cls
+
+
 def get_arguments():
     """Parse all the arguments provided from the CLI.
 
@@ -93,7 +93,7 @@ def get_arguments():
     """
     parser = argparse.ArgumentParser(description="NAS Search")
 
-    parser.add_argument("--dataset_type", type=str, default='EG1800',#'celebA-binary',#'EG1800',
+    parser.add_argument("--dataset_type", type=str, default='EG1800',#'celebA-binary',
                         help="dataset type to be trained or valued.")
 
     # Dataset
@@ -113,8 +113,8 @@ def get_arguments():
                         help="Crop size for training,")
     parser.add_argument("--normalise-params", type=list, default=NORMALISE_PARAMS,
                         help="Normalisation parameters [scale, mean, std],")
-    parser.add_argument("--batch-size", type=int, nargs='+', default=BATCH_SIZE,
-                        help="Batch size to train the segmenter model.")
+    # parser.add_argument("--batch-size", type=int, nargs='+', default=BATCH_SIZE,
+    #                     help="Batch size to train the segmenter model.")
     parser.add_argument("--num-workers", type=int, default=NUM_WORKERS,
                         help="Number of workers for pytorch's dataloader.")
     # parser.add_argument("--num-classes", type=int, nargs='+', default=NUM_CLASSES,
@@ -129,8 +129,8 @@ def get_arguments():
                         help="Shorter side transformation during validation.")
     parser.add_argument("--val-crop-size", type=int, default=VAL_CROP_SIZE,
                         help="Crop size for validation.")
-    parser.add_argument("--val-batch-size", type=int, default=VAL_BATCH_SIZE,
-                        help="Batch size to validate the segmenter model.")
+    # parser.add_argument("--val-batch-size", type=int, default=VAL_BATCH_SIZE,
+    #                     help="Batch size to validate the segmenter model.")
 
     # Encoder
     parser.add_argument('--enc-grad-clip', type=float, default=ENC_GRAD_CLIP,
@@ -147,33 +147,55 @@ def get_arguments():
                         help='Whether to keep batch norm statistics intact.')
     parser.add_argument("--num-epochs", type=int, default=NUM_EPOCHS,
                         help='Number of epochs to train for the controller.')
-    parser.add_argument("--num-segm-epochs", type=int, nargs='+', default=NUM_SEGM_EPOCHS,
-                        help='Number of epochs to train for each sampled network.')
+    # parser.add_argument("--num-segm-epochs", type=int, nargs='+', default=NUM_SEGM_EPOCHS,
+    #                     help='Number of epochs to train for each sampled network.')
     parser.add_argument("--print-every", type=int, default=PRINT_EVERY,
                         help='Print information every often.')
     parser.add_argument("--random-seed", type=int, default=RANDOM_SEED,
                         help='Seed to provide (near-)reproducibility.')
     parser.add_argument("--snapshot-dir", type=str, default=SNAPSHOT_DIR,
                         help="Path to directory for storing checkpoints.")
-    parser.add_argument("--ckpt-path", type=str, default=SEGMENTER_CKPT_PATH,
-                        help="Path to the checkpoint file.")
     parser.add_argument("--val-every", nargs='+', type=int, default=VAL_EVERY,
                         help="How often to validate current architecture.")
     parser.add_argument("--summary-dir", type=str, default=SUMMARY_DIR,
                         help="Summary directory.")
-    # Controller
-    parser.add_argument("--hidden_size", type=int, default=100,
-                        help="Number of neurons in the controller's RNN.")
-    parser.add_argument("--num_lstm_layers", type=int, default=2,
-                        help="Number of layers in the controller.")
-    parser.add_argument("--op-size", type=int, default=OP_SIZE,
-                        help="Number of unique operations.")
+
+    parser.add_argument("--ckpt-path", type=str, default=SEGMENTER_CKPT_PATH,
+                        help="Path to the checkpoint file.")
+
+    # Optimisers
+    parser.add_argument("--lr-enc", type=float, nargs='+', default=LR_ENC,
+                        help="Learning rate for encoder.")
+    parser.add_argument("--lr-dec", type=float, nargs='+', default=LR_DEC,
+                        help="Learning rate for decoder.")
+    parser.add_argument("--lr-ctrl", type=float, default=LR_CTRL,
+                        help="Learning rate for controller.")
+    parser.add_argument("--mom-enc", type=float, nargs='+', default=MOM_ENC,
+                        help="Momentum for encoder.")
+    parser.add_argument("--mom-dec", type=float, nargs='+', default=MOM_DEC,
+                        help="Momentum for decoder.")
+    parser.add_argument("--mom-ctrl", type=float, default=MOM_CTRL,
+                        help="Momentum for controller.")
+    parser.add_argument("--wd-enc", type=float, nargs='+', default=WD_ENC,
+                        help="Weight decay for encoder.")
+    parser.add_argument("--wd-dec", type=float, nargs='+', default=WD_DEC,
+                        help="Weight decay for decoder.")
+    parser.add_argument("--wd-ctrl", type=float, default=WD_CTRL,
+                        help="Weight decay rate for controller.")
+    parser.add_argument("--optim-enc", type=str, default=OPTIM_ENC,
+                        help="Optimiser algorithm for encoder.")
+    parser.add_argument("--optim-dec", type=str, default=OPTIM_DEC,
+                        help="Optimiser algorithm for decoder.")
+    parser.add_argument("--do-kd", type=bool, default=DO_KD,
+                        help="Whether to do knowledge distillation (KD).")
+    parser.add_argument("--kd-coeff", type=float, default=KD_COEFF,
+                        help="KD loss coefficient.")
+    parser.add_argument("--do-polyak", type=bool, default=DO_POLYAK,
+                        help="Whether to do Polyak averaging.")
+
+
     parser.add_argument("--agg-cell-size", type=int, default=AGG_CELL_SIZE,
                         help="Common size inside decoder")
-    parser.add_argument("--bl-dec", type=float, default=BL_DEC,
-                        help="Baseline decay.")
-    parser.add_argument("--agent-ctrl", type=str, default=AGENT_CTRL,
-                        help="Gradient estimator algorithm")
     parser.add_argument("--num-cells", type=int, default=NUM_CELLS,
                         help="Number of cells to apply.")
     parser.add_argument("--num-branches", type=int, default=NUM_BRANCHES,
@@ -197,16 +219,6 @@ class Segmenter(nn.Module):
         return self.decoder(self.encoder(x))
 
 
-color_list = [[0, 0, 0], [204, 0, 0], [76, 153, 0], [204, 204, 0], [51, 51, 255], [204, 0, 204], [0, 255, 255], [255, 204, 204], [102, 51, 0], [255, 0, 0], [102, 204, 0], [255, 255, 0], [0, 0, 153], [0, 0, 204], [255, 51, 153], [0, 204, 204], [0, 51, 0], [255, 153, 51], [0, 204, 0]]
-'''imgs = [
-    '../examples/face_test_img/2345.jpg',
-    '../examples/face_test_img/3456.jpg',
-    '../examples/face_test_img/6789.jpg',
-]'''
-
-TEST_IMG_PATH = {'celebA':'../data/datasets/portrait_parsing','EG1800':'../data/datasets/portrait_seg/EG1800'}
-RAW_IMAGE_PATH = {'celebA':'CelebA-HA-img-resize','EG1800':'Images','celebA-binary':'CelebA-HA-img-resize'}
-MASK_IMAGE_PATH = {'celebA':'CelebAMask-HQ-mask','EG1800':'Labels','celebA-binary':'CelebAMask-HQ-mask-binary'}
 def main():
     # Set-up experiment
     args = get_arguments()
@@ -217,9 +229,8 @@ def main():
     #     os.makedirs(dir_name)
     # arch_writer = open('{}/genotypes.out'.format(dir_name), 'w')
     logger.info(" Running Experiment {}".format(exp_name))
-    args.num_tasks = len(NUM_CLASSES[args.dataset_type])
-    segm_crit = nn.NLLLoss2d(ignore_index=255).cuda()
-
+    # args.num_tasks = len(NUM_CLASSES[args.dataset_type])
+    # segm_crit = nn.NLLLoss2d(ignore_index=255).cuda()
     # Set-up random seeds
     torch.manual_seed(args.random_seed)
     if torch.cuda.is_available():
@@ -231,6 +242,7 @@ def main():
     encoder = create_encoder()
     logger.info(" Loaded Encoder with #TOTAL PARAMS={:3.2f}M"
                 .format(compute_params(encoder)[0] / 1e6))
+
     def create_segmenter(encoder):
         with torch.no_grad():
             #decoder_config, entropy, log_prob = agent.controller.sample()
@@ -251,89 +263,22 @@ def main():
         return segmenter
 
     # Sample first configuration
-    segmenter  = create_segmenter(encoder)
+    segmenter= create_segmenter(encoder)
     del encoder
 
-    #NUM_CLASSES = [17, 17]
     segmenter.load_state_dict(torch.load(args.ckpt_path[args.dataset_type]))
     logger.info(" Loaded Encoder with #TOTAL PARAMS={:3.2f}M"
                 .format(compute_params(segmenter)[0] / 1e6))
 
+    # Create dataloaders
+    train_loader, val_loader, do_search = create_loaders(args)
 
-
-    TEST_NUM = 6
-    fig, axes = plt.subplots(TEST_NUM, 3, figsize=(12, 12))
-    ax= axes.ravel()
-    color_array = np.array(color_list)
-    random.seed()
-
-    # if args.dataset_type == 'celebA' :
-    #     imgs = [os.path.join(TEST_IMG_PATH['celebA'],RAW_IMAGE_PATH['celebA'],'{}.jpg'.format(random.randint(0,30000))) for i in range(TEST_NUM)]
-    #     msks = [imgs[i].replace(RAW_IMAGE_PATH['celebA'],MASK_IMAGE_PATH['celebA']).replace('jpg','png') for i in range(TEST_NUM)]
-    # elif args.dataset_type == 'EG1800' :#or args.dataset_type == 'celebA-binary':
-    #     imgs = [os.path.join(TEST_IMG_PATH['EG1800'],RAW_IMAGE_PATH['EG1800'],'{}'.format(random.randint(0,100)).rjust(5,'0')+'.png') for i in range(TEST_NUM)]
-    #     msks = [imgs[i].replace(RAW_IMAGE_PATH['EG1800'],MASK_IMAGE_PATH['EG1800']) for i in range(TEST_NUM)]
-
-
-    data_file=dataset_dirs[args.dataset_type]['TRAIN_LIST']
-    data_dir=dataset_dirs[args.dataset_type]['TRAIN_DIR']
-
-    with open(data_file, 'rb') as f:
-        datalist = f.readlines()
-    try:
-        datalist = [
-            (k, v) for k, v, _ in \
-                map(lambda x: x.decode('utf-8').strip('\n').split('\t'), datalist)]
-    except ValueError: # Adhoc for test.
-        datalist = [
-            (k, k) for k in map(lambda x: x.decode('utf-8').strip('\n'), datalist)]
-
-    random_array = random.sample(range(0,len(datalist)),TEST_NUM)
-    # imgs = [os.path.join(data_dir,datalist[i][0]) for i in random_array]
-    # msks = [os.path.join(data_dir,datalist[i][1]) for i in random_array]
-
-    imgs = [
-        '../data/datasets/portrait_seg/EG1800/Images/00168.png',
-        '../data/datasets/portrait_seg/EG1800/Images/00324.png',
-        '../data/datasets/portrait_seg/EG1800/Images/00415.png',
-        '../data/datasets/portrait_seg/EG1800/Images/00633.png',
-        '../data/datasets/portrait_seg/EG1800/Images/00617.png',
-    ]
-    msks = [
-        '../data/datasets/portrait_seg/EG1800/Labels/00168.png',
-        '../data/datasets/portrait_seg/EG1800/Labels/00324.png',
-        '../data/datasets/portrait_seg/EG1800/Labels/00415.png',
-        '../data/datasets/portrait_seg/EG1800/Labels/00633.png',
-        '../data/datasets/portrait_seg/EG1800/Labels/00617.png',
-    ]
-    show_raw_portrait_seg = 0
-    for i,img_path in enumerate(imgs):
-        logger.info("Testing image:{}".format(img_path))
-        img = np.array(Image.open(img_path))
-        msk = np.array(Image.open(msks[i]))
-        orig_size = img.shape[:2][::-1]
-        ax[3*i].imshow(img,aspect='auto')
-        if args.dataset_type =='EG1800' and show_raw_portrait_seg:
-            img_msk = img.copy()
-            img_msk[msk == 0] = 0
-            ax[3*i+1].imshow(img_msk,aspect='auto')
-        else:
-            msk = color_array[msk]
-            ax[3*i+1].imshow(msk,aspect='auto')
-
-        img_inp = torch.tensor(prepare_img(img).transpose(2, 0, 1)[None]).float().to(device)
-        segm = segmenter(img_inp)[0].squeeze().data.cpu().numpy().transpose((1, 2, 0)) #47*63*21
-        segm = cv2.resize(segm, orig_size, interpolation=cv2.INTER_CUBIC) #375*500*21
-        segm = segm.argmax(axis=2).astype(np.uint8)
-        if args.dataset_type =='EG1800'  and show_raw_portrait_seg:
-            img_segm = img.copy()
-            img_segm[segm == 0] = 0
-            ax[3*i+2].imshow(img_segm,aspect='auto')
-        else:
-            segm = color_array[segm]  #375*500*3  #wath this usage ,very very important
-            ax[3*i+2].imshow(segm,aspect='auto')
-            # print(segm.shape)
-    plt.show()
+    task_miou = validate(segmenter,
+                         val_loader,
+                         1,
+                         1, #[5,1]
+                         num_classes=NUM_CLASSES[args.dataset_type][0],
+                         print_every=args.print_every)
 
 if __name__ == '__main__':
     main()
