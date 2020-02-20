@@ -42,7 +42,7 @@ import cv2
 import matplotlib.pyplot as plt
 
 from utils.helpers import prepare_img
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
+os.environ["CUDA_VISIBLE_DEVICES"]="3"
 logging.basicConfig(level=logging.INFO)
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'

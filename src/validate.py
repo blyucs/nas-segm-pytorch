@@ -40,7 +40,7 @@ from utils.default_args import *
 from utils.solvers import create_optimisers
 
 
-os.environ["CUDA_VISIBLE_DEVICES"]="0,1,2,3"
+os.environ["CUDA_VISIBLE_DEVICES"]="3"
 logging.basicConfig(level=logging.INFO)
 # TRAIN_EPOCH_NUM = {'celebA':[40,10],'EG1800':[0,50],'celebA-binary':[0,6]}
 

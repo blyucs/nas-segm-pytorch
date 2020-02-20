@@ -40,7 +40,7 @@ from utils.default_args import *
 from utils.solvers import create_optimisers
 
 
-os.environ["CUDA_VISIBLE_DEVICES"]="0,1,2,3"
+os.environ["CUDA_VISIBLE_DEVICES"]=""
 logging.basicConfig(level=logging.INFO)
 def get_arguments():
     """Parse all the arguments provided from the CLI.
