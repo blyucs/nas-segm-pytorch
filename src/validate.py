@@ -55,9 +55,9 @@ SEGMENTER_CKPT_PATH = \
         #'EG1800':'./ckpt/train20200118T1224/segmenter_checkpoint.pth.tar'
         #'EG1800':'./ckpt/train20200118T1239/segmenter_checkpoint.pth.tar'
         #'EG1800': './ckpt/_train_EG1800_20200217T1405/segmenter_checkpoint.pth.tar',# [2,[1,0,10,8]]
-        # 'celebA-binary': './ckpt/_train_celebA-binary_20200118T1715/segmenter_checkpoint.pth.tar', #MIOU 0.976 in cele-binary ,0.944 in EG1800,currently best(0217)
+        'celebA-binary': './ckpt/_train_celebA-binary_20200118T1715/segmenter_checkpoint.pth.tar', #MIOU 0.976 in cele-binary ,0.944 in EG1800,currently best(0217)
         # 'EG1800': './ckpt/_train_EG1800_20200217T1922/segmenter_checkpoint.pth.tar',
-        'celebA-binary': './ckpt/_train_EG1800_20200217T1922/segmenter_checkpoint.pth.tar',
+        #'celebA-binary': './ckpt/_train_EG1800_20200217T1922/segmenter_checkpoint.pth.tar',
         #'EG1800': './ckpt/_train_EG1800_20200217T2216/segmenter_checkpoint.pth.tar',
 
         # 'EG1800': './ckpt/_train_EG1800_20200218T1319/segmenter_checkpoint.pth.tar',
