@@ -42,7 +42,7 @@ import cv2
 import matplotlib.pyplot as plt
 
 from utils.helpers import prepare_img
-os.environ["CUDA_VISIBLE_DEVICES"]="3"
+os.environ["CUDA_VISIBLE_DEVICES"]="2,3"
 logging.basicConfig(level=logging.INFO)
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -67,6 +67,8 @@ SEGMENTER_CKPT_PATH = \
         # 'EG1800': './ckpt/_train_EG1800_20200218T1842/segmenter_checkpoint.pth.tar',
         # 'EG1800': './ckpt/_train_EG1800_20200218T2034/segmenter_checkpoint.pth.tar',  #0.967
         'EG1800': './ckpt/_train_EG1800_20200218T2158/segmenter_checkpoint.pth.tar',  #0.873
+        # 'helen': './ckpt/_train_helen_20200223T1724/segmenter_checkpoint.pth.tar',  #0.873
+        'helen': './ckpt/_train_helen_20200224T1611/segmenter_checkpoint.pth.tar',  # 0.873
     }
 
 # decoder_config = [[0, [0, 0, 5, 6], [4, 3, 5, 5], [2, 7, 2, 5]], [[3, 3], [2, 3], [4, 0]]]
@@ -81,7 +83,8 @@ decoder_config = \
         #'EG1800':[[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]], #0.9636 EG1800
         # 'EG1800': [[2, [1, 0, 10, 8], [2, 3, 1, 8], [2, 1, 2, 2]], [[3, 1], [2, 4], [5, 5]]],
         'EG1800':[[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]], #0.9636 EG1800:
-        'celebA-binary':[[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]] #0.9636 EG1800:
+        'celebA-binary':[[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]], #0.9636 EG1800:
+        'helen':[[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2]]],
     }
 # decoder_config = [[10, [1, 0, 8, 10], [0, 1, 3, 2], [7, 1, 4, 3]], [[3, 0], [3, 4], [3, 2]]] #0.095 worst all cls
 # [[10, [1, 1, 5, 2], [3, 0, 3, 4], [6, 7, 5, 9]], [[0, 0], [4, 3], [3, 1]]] #0.1293 all cls
@@ -93,7 +96,7 @@ def get_arguments():
     """
     parser = argparse.ArgumentParser(description="NAS Search")
 
-    parser.add_argument("--dataset_type", type=str, default='EG1800',#'celebA-binary',#'EG1800',
+    parser.add_argument("--dataset_type", type=str, default='helen',#'EG1800',#'celebA-binary',#'EG1800',
                         help="dataset type to be trained or valued.")
 
     # Dataset
@@ -196,7 +199,7 @@ class Segmenter(nn.Module):
     def forward(self, x):
         return self.decoder(self.encoder(x))
 
-
+### see the color config in dmh code
 color_list = [[0, 0, 0], [204, 0, 0], [76, 153, 0], [204, 204, 0], [51, 51, 255], [204, 0, 204], [0, 255, 255], [255, 204, 204], [102, 51, 0], [255, 0, 0], [102, 204, 0], [255, 255, 0], [0, 0, 153], [0, 0, 204], [255, 51, 153], [0, 204, 204], [0, 51, 0], [255, 153, 51], [0, 204, 0]]
 '''imgs = [
     '../examples/face_test_img/2345.jpg',
@@ -259,9 +262,9 @@ def main():
     logger.info(" Loaded Encoder with #TOTAL PARAMS={:3.2f}M"
                 .format(compute_params(segmenter)[0] / 1e6))
 
+    segmenter.eval()
 
-
-    TEST_NUM = 6
+    TEST_NUM = 5
     fig, axes = plt.subplots(TEST_NUM, 3, figsize=(12, 12))
     ax= axes.ravel()
     color_array = np.array(color_list)
@@ -275,8 +278,8 @@ def main():
     #     msks = [imgs[i].replace(RAW_IMAGE_PATH['EG1800'],MASK_IMAGE_PATH['EG1800']) for i in range(TEST_NUM)]
 
 
-    data_file=dataset_dirs[args.dataset_type]['TRAIN_LIST']
-    data_dir=dataset_dirs[args.dataset_type]['TRAIN_DIR']
+    data_file=dataset_dirs[args.dataset_type]['VAL_LIST']
+    data_dir=dataset_dirs[args.dataset_type]['VAL_DIR']
 
     with open(data_file, 'rb') as f:
         datalist = f.readlines()
@@ -289,10 +292,10 @@ def main():
             (k, k) for k in map(lambda x: x.decode('utf-8').strip('\n'), datalist)]
 
     random_array = random.sample(range(0,len(datalist)),TEST_NUM)
-    # imgs = [os.path.join(data_dir,datalist[i][0]) for i in random_array]
-    # msks = [os.path.join(data_dir,datalist[i][1]) for i in random_array]
+    imgs = [os.path.join(data_dir,datalist[i][0]) for i in random_array]
+    msks = [os.path.join(data_dir,datalist[i][1]) for i in random_array]
 
-    imgs = [
+    '''imgs = [
         '../data/datasets/portrait_seg/EG1800/Images/00168.png',
         '../data/datasets/portrait_seg/EG1800/Images/00324.png',
         '../data/datasets/portrait_seg/EG1800/Images/00415.png',
@@ -305,7 +308,8 @@ def main():
         '../data/datasets/portrait_seg/EG1800/Labels/00415.png',
         '../data/datasets/portrait_seg/EG1800/Labels/00633.png',
         '../data/datasets/portrait_seg/EG1800/Labels/00617.png',
-    ]
+    ]'''
+
     show_raw_portrait_seg = 0
     for i,img_path in enumerate(imgs):
         logger.info("Testing image:{}".format(img_path))
@@ -318,8 +322,9 @@ def main():
             img_msk[msk == 0] = 0
             ax[3*i+1].imshow(img_msk,aspect='auto')
         else:
+            ax[3*i+1].imshow(img,aspect='auto')
             msk = color_array[msk]
-            ax[3*i+1].imshow(msk,aspect='auto')
+            ax[3*i+1].imshow(msk,aspect='auto',alpha=0.7)
 
         img_inp = torch.tensor(prepare_img(img).transpose(2, 0, 1)[None]).float().to(device)
         segm = segmenter(img_inp)[0].squeeze().data.cpu().numpy().transpose((1, 2, 0)) #47*63*21
@@ -331,7 +336,8 @@ def main():
             ax[3*i+2].imshow(img_segm,aspect='auto')
         else:
             segm = color_array[segm]  #375*500*3  #wath this usage ,very very important
-            ax[3*i+2].imshow(segm,aspect='auto')
+            ax[3*i+2].imshow(img,aspect='auto')
+            ax[3*i+2].imshow(segm,aspect='auto',alpha=0.7)
             # print(segm.shape)
     plt.show()
 

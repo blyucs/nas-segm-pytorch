@@ -40,7 +40,7 @@ from utils.default_args import *
 from utils.solvers import create_optimisers
 
 
-os.environ["CUDA_VISIBLE_DEVICES"]=""
+os.environ["CUDA_VISIBLE_DEVICES"]="2,3"
 logging.basicConfig(level=logging.INFO)
 def get_arguments():
     """Parse all the arguments provided from the CLI.
@@ -50,7 +50,7 @@ def get_arguments():
     """
     parser = argparse.ArgumentParser(description="NAS Search")
 
-    parser.add_argument("--dataset_type", type=str, default= 'EG1800',#'celebA-binary',
+    parser.add_argument("--dataset_type", type=str, default= 'helen',#'EG1800',#'celebA-binary',
                         help="dataset type to be trained or valued.")
 
     # Dataset
@@ -223,8 +223,8 @@ def main():
             # decoder_config = [[1, [0, 0, 6, 0], [0, 3, 8, 3], [3, 0, 6, 3]], [[1, 2], [2, 4], [0, 4]]] #0.7137 all cls
             # decoder_config = [[10, [1, 0, 8, 10], [0, 1, 3, 2], [7, 1, 4, 3]], [[3, 0], [3, 4], [3, 2]]] #0.095 worst all cls
             # [[10, [1, 1, 5, 2], [3, 0, 3, 4], [6, 7, 5, 9]], [[0, 0], [4, 3], [3, 1]]] #0.1293 all cls
-            #decoder_config = [[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2]]] # 0.7816 reward
-            decoder_config = [[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]] #0.9636 EG1800
+            decoder_config = [[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2]]] # 0.7816 reward
+            # decoder_config = [[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]] #0.9636 EG1800
             #decoder_config = [[1, [1, 0, 3, 9], [2, 3, 4, 9], [2, 1, 1, 1]], [[1, 3], [2, 0], [0, 3]]]  #0.9636 EG1800
             #decoder_config = [[2, [1, 0, 10, 8], [2, 3, 1, 8], [2, 1, 2, 2]], [[3, 1], [2, 4], [5, 5]]]
             decoder = Decoder(inp_sizes=encoder.out_sizes,
@@ -248,7 +248,8 @@ def main():
     # finetune_ckpt_path = './ckpt/_train_celebA-binary_20200118T1715/segmenter_checkpoint.pth.tar'
     # finetune_ckpt_path = './ckpt/_train_EG1800_20200217T1922/segmenter_checkpoint.pth.tar'
     #finetune_ckpt_path = './ckpt/_train_EG1800_20200218T1319/segmenter_checkpoint.pth.tar'
-    finetune_ckpt_path = './ckpt/_train_EG1800_20200218T2034/segmenter_checkpoint.pth.tar'
+    #finetune_ckpt_path = './ckpt/_train_EG1800_20200218T2034/segmenter_checkpoint.pth.tar'
+    finetune_ckpt_path = './ckpt/_train_helen_20200223T1724/segmenter_checkpoint.pth.tar'
     segmenter.load_state_dict(torch.load(finetune_ckpt_path))
     logger.info(" Loaded Encoder with #TOTAL PARAMS={:3.2f}M"
                 .format(compute_params(segmenter)[0] / 1e6))
@@ -288,10 +289,10 @@ def main():
 
     logger.info(" Pre-computing data for task0")
     kd_net = None# stub the kd
-    Xy_train = populate_task0(
-        segmenter, train_loader, kd_net, N_TASK0[args.dataset_type], args.do_kd)
-    if args.do_kd:
-        del kd_net
+    # Xy_train = populate_task0(
+    #     segmenter, train_loader, kd_net, N_TASK0[args.dataset_type], args.do_kd)
+    # if args.do_kd:
+    #     del kd_net
 
     logger.info(" Training Process Starts")
     for task_idx in range(args.num_tasks):#0,1
@@ -328,6 +329,7 @@ def main():
         kd_crit = None #stub the kd
         for epoch_segm in range(TRAIN_EPOCH_NUM[args.dataset_type][task_idx]): #[5,1] [20,8]
             if task_idx == 0:
+                '''
                 train_task0(Xy_train, #train the decoder once
                             segmenter,
                             optim_dec,
@@ -343,6 +345,8 @@ def main():
                             avg_param=avg_param,
                             polyak_decay=0.9,
                             aux_weight=args.dec_aux_weight)
+                '''
+                pass
             else:
                 train_segmenter(segmenter,  #train the segmenter end to end onece
                                 train_loader,

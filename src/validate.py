@@ -37,10 +37,13 @@ from nn.encoders import create_encoder
 from nn.micro_decoders import MicroDecoder as Decoder
 from rl.agent import create_agent, train_agent
 from utils.default_args import *
+from utils.f1_score import *
 from utils.solvers import create_optimisers
+import matplotlib.pyplot as plt
+import shutil
+import cv2
 
-
-os.environ["CUDA_VISIBLE_DEVICES"]="3"
+os.environ["CUDA_VISIBLE_DEVICES"]="2,3"
 logging.basicConfig(level=logging.INFO)
 # TRAIN_EPOCH_NUM = {'celebA':[40,10],'EG1800':[0,50],'celebA-binary':[0,6]}
 
@@ -66,6 +69,8 @@ SEGMENTER_CKPT_PATH = \
         # 'EG1800': './ckpt/_train_EG1800_20200218T1842/segmenter_checkpoint.pth.tar',
         # 'EG1800': './ckpt/_train_EG1800_20200218T2034/segmenter_checkpoint.pth.tar', #0.967
         'EG1800': './ckpt/_train_EG1800_20200218T2158/segmenter_checkpoint.pth.tar',  # 0.873
+        # 'helen': './ckpt/_train_helen_20200223T1724/segmenter_checkpoint.pth.tar',  # 0.873
+        'helen': './ckpt/_train_helen_20200224T1611/segmenter_checkpoint.pth.tar',  # 0.873
     }
 
 # decoder_config = [[0, [0, 0, 5, 6], [4, 3, 5, 5], [2, 7, 2, 5]], [[3, 3], [2, 3], [4, 0]]]
@@ -79,7 +84,8 @@ decoder_config = \
         'celebA':[[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2]]],  # 0.803
         'EG1800':[[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]], #0.924
         #'EG1800': [[2, [1, 0, 10, 8], [2, 3, 1, 8], [2, 1, 2, 2]], [[3, 1], [2, 4], [5, 5]]],
-        'celebA-binary':[[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]] #0.976
+        'celebA-binary':[[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]], #0.976
+        'helen': [[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2]]],
     }
 # decoder_config = [[10, [1, 0, 8, 10], [0, 1, 3, 2], [7, 1, 4, 3]], [[3, 0], [3, 4], [3, 2]]] #0.095 worst all cls
 # [[10, [1, 1, 5, 2], [3, 0, 3, 4], [6, 7, 5, 9]], [[0, 0], [4, 3], [3, 1]]] #0.1293 all cls
@@ -93,7 +99,7 @@ def get_arguments():
     """
     parser = argparse.ArgumentParser(description="NAS Search")
 
-    parser.add_argument("--dataset_type", type=str, default='EG1800',#'celebA-binary',
+    parser.add_argument("--dataset_type", type=str, default= 'helen',#'EG1800',#'celebA-binary',
                         help="dataset type to be trained or valued.")
 
     # Dataset
@@ -271,9 +277,54 @@ def main():
                 .format(compute_params(segmenter)[0] / 1e6))
 
     # Create dataloaders
-    train_loader, val_loader, do_search = create_loaders(args)
+    _, val_loader, _ = create_loaders(args)
+    try:
+        val_loader.dataset.set_stage('val')
+    except AttributeError:
+        val_loader.dataset.dataset.set_stage('val')  # for subset
+    if args.dataset_type == 'helen':
+        validate_output_dir = os.path.join(dataset_dirs['helen']['VAL_DIR'], 'validate_output')
+        validate_gt_dir = os.path.join(dataset_dirs['helen']['VAL_DIR'], 'validate_gt')
+        if not os.path.exists(validate_output_dir):
+            os.makedirs(validate_output_dir)
+        else:
+            shutil.rmtree(validate_output_dir)
+            os.makedirs(validate_output_dir)
 
-    task_miou = validate(segmenter,
+        if not os.path.exists(validate_gt_dir):
+            os.makedirs(validate_gt_dir)
+        else:
+            shutil.rmtree(validate_gt_dir)
+            os.makedirs(validate_gt_dir)
+        _out_type_1_ = 0 # helen validte type flag
+        for i,sample in enumerate(val_loader):
+            for j in range(VAL_BATCH_SIZE[args.dataset_type]):
+                image = sample['image'] # 1x3x400x400
+                target = sample['mask'] # 1x400x400  int:0-11
+                gt = target.data.cpu().numpy().astype(np.uint8)  #1x400x400 int:0-11
+                input_var = torch.autograd.Variable(image).float().cuda()
+                if _out_type_1_:
+                    # Compute output
+                    output, _ = segmenter(input_var) #1x11x100x100 float
+                    output = nn.Upsample(size=target.size()[1:], mode='bilinear',
+                                         align_corners=False)(output) #1x11x400x400 float
+                    # Compute IoU
+                    output = output.data.cpu().numpy().argmax(axis=1).astype(np.uint8) # 1x400x400 int:0-11
+                    cv2.imwrite(os.path.join(validate_output_dir, "{}.png".format(i)), output[0])
+                    cv2.imwrite(os.path.join(validate_gt_dir, "{}.png".format(i)), gt[0])
+                else:
+                    segm = segmenter(input_var)[0].squeeze().data.cpu().numpy().transpose((1, 2, 0))  # 47*63*21
+                    segm = cv2.resize(segm, target.size()[1:], interpolation=cv2.INTER_CUBIC)  # 375*500*21
+                    segm = segm.argmax(axis=2).astype(np.uint8)
+                    cv2.imwrite(os.path.join(validate_output_dir,"{}.png".format(i)),segm)
+                    cv2.imwrite(os.path.join(validate_gt_dir,"{}.png".format(i)),gt[0])
+
+        cal_f1_score(validate_gt_dir,validate_output_dir)
+
+            # if i > 50:
+            #     break
+    else:
+        task_miou = validate(segmenter,
                          val_loader,
                          1,
                          1, #[5,1]

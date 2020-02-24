@@ -7,22 +7,31 @@ from torchvision import transforms
 
 import matplotlib.pyplot as plt
 
+data_path = '../../../data/datasets/helen/'
 
-train_image_id_list = open(os.path.join('.', 'train.lst'), 'w')
-val_image_id_list = open(os.path.join('.','val.lst'), 'w')
-for fpathe,dirs,files in os.walk('./train'):
+train_image_id_list = open(os.path.join(data_path, 'train.lst'), 'w')
+val_image_id_list = open(os.path.join(data_path,'val.lst'), 'w')
+val_single_image_id_list = open(os.path.join(data_path,'val_single.lst'), 'w')
+for fpathe,dirs,files in os.walk(os.path.join(data_path,'train')):
 	for file in files:
 		if file.endswith('image.jpg'):
 			train_image_id_list.write('train/'+file+'\t')
 			train_image_id_list.write('train/'+file.replace('image.jpg','label.png')+'\t')
 			train_image_id_list.write('train/' + file.replace('image.jpg', 'label.png') + '\n')
 
-for fpathe,dirs,files in os.walk('./test_resize'):
+for fpathe,dirs,files in os.walk(os.path.join(data_path,'test_resize')):
 	for file in files:
 		if file.endswith('image.jpg'):
-			val_image_id_list.write('train/'+file+'\t')
-			val_image_id_list.write('train/'+file.replace('image.jpg','label.png')+'\t')
-			val_image_id_list.write('train/' + file.replace('image.jpg', 'label.png') + '\n')
+			val_image_id_list.write('test_resize/'+file+'\t')
+			val_image_id_list.write('test_resize/'+file.replace('image.jpg','label.png')+'\t')
+			val_image_id_list.write('test_resize/' + file.replace('image.jpg', 'label.png') + '\n')
+
+for fpathe,dirs,files in os.walk(os.path.join(data_path,'test_resize_single')):
+	for file in files:
+		if file.endswith('image.jpg'):
+			val_single_image_id_list.write('test_resize_single/'+file+'\t')
+			val_single_image_id_list.write('test_resize_single/'+file.replace('image.jpg','label.png')+'\t')
+			val_single_image_id_list.write('test_resize_single/' + file.replace('image.jpg', 'label.png') + '\n')
 
 # # Show image with segmentations
 # # fig, ax = plt.subplots(figsize=[10,10])
