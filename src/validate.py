@@ -69,8 +69,12 @@ SEGMENTER_CKPT_PATH = \
         # 'EG1800': './ckpt/_train_EG1800_20200218T1842/segmenter_checkpoint.pth.tar',
         # 'EG1800': './ckpt/_train_EG1800_20200218T2034/segmenter_checkpoint.pth.tar', #0.967
         'EG1800': './ckpt/_train_EG1800_20200218T2158/segmenter_checkpoint.pth.tar',  # 0.873
-        # 'helen': './ckpt/_train_helen_20200223T1724/segmenter_checkpoint.pth.tar',  # 0.873
-        'helen': './ckpt/_train_helen_20200224T1611/segmenter_checkpoint.pth.tar',  # 0.873
+        # 'helen': './ckpt/_train_helen_20200223T1724/segmenter_checkpoint.pth.tar',  #
+        # 'helen': './ckpt/_train_helen_20200224T1611/segmenter_checkpoint.pth.tar',  # 0.81
+        # 'helen': './ckpt/_train_helen_20200225T1251/segmenter_checkpoint.pth.tar',  # 0.873
+        # 'helen': './ckpt/_train_helen_20200225T1319/segmenter_checkpoint.pth.tar',  # 0.7476  # no pre-trained mobilenetV2 poor performance
+        # 'helen': './ckpt/_train_celebA-face_20200225T1518/segmenter_checkpoint_0.20.pth.tar',  #0.74176
+        'helen': './ckpt/_train_celebA-face_20200225T1901/segmenter_checkpoint_0.14.pth.tar',
     }
 
 # decoder_config = [[0, [0, 0, 5, 6], [4, 3, 5, 5], [2, 7, 2, 5]], [[3, 3], [2, 3], [4, 0]]]
@@ -313,15 +317,26 @@ def main():
                     cv2.imwrite(os.path.join(validate_output_dir, "{}.png".format(i)), output[0])
                     cv2.imwrite(os.path.join(validate_gt_dir, "{}.png".format(i)), gt[0])
                 else:
-                    segm = segmenter(input_var)[0].squeeze().data.cpu().numpy().transpose((1, 2, 0))  # 47*63*21
-                    segm = cv2.resize(segm, target.size()[1:], interpolation=cv2.INTER_CUBIC)  # 375*500*21
-                    segm = segm.argmax(axis=2).astype(np.uint8)
-                    cv2.imwrite(os.path.join(validate_output_dir,"{}.png".format(i)),segm)
-                    cv2.imwrite(os.path.join(validate_gt_dir,"{}.png".format(i)),gt[0])
+                    if 1:
+                        segm = segmenter(input_var)[0].squeeze().data.cpu().numpy().transpose((1, 2, 0))  # 47*63*21
+                        # segm = cv2.resize(segm, tuple(target.size()[1:]), interpolation=cv2.INTER_CUBIC)  # 375*500*21
+                        segm = cv2.resize(segm, target.size()[1:][::-1], interpolation=cv2.INTER_CUBIC)  # 375*500*21
+                        segm = segm.argmax(axis=2).astype(np.uint8)
+                        cv2.imwrite(os.path.join(validate_output_dir,"{}.png".format(i)),segm)
+                        cv2.imwrite(os.path.join(validate_gt_dir,"{}.png".format(i)),gt[0])
+
+                    # segm = segmenter(input_var)[0].squeeze().data.cpu().numpy().transpose((1, 2, 0))  # 47*63*21
+                    # # segm = cv2.resize(segm, target.size()[1:], interpolation=cv2.INTER_CUBIC)  # 375*500*21
+                    # segm = cv2.resize(segm, (800,800), interpolation=cv2.INTER_CUBIC)  # 375*500*21
+                    # segm = segm.argmax(axis=2).astype(np.uint8)
+                    # gto = cv2.resize(gt[0], (800,800),interpolation=cv2.INTER_CUBIC)
+                    # # gto = cv2.resize(gt[0],segm.shape,interpolation=cv2.INTER_CUBIC)
+                    # cv2.imwrite(os.path.join(validate_output_dir, "{}.png".format(i)), segm)
+                    # cv2.imwrite(os.path.join(validate_gt_dir, "{}.png".format(i)), gto)
 
         cal_f1_score(validate_gt_dir,validate_output_dir)
 
-            # if i > 50:
+        # if i > 50:
             #     break
     else:
         task_miou = validate(segmenter,

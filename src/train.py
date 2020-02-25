@@ -40,7 +40,7 @@ from utils.default_args import *
 from utils.solvers import create_optimisers
 
 
-os.environ["CUDA_VISIBLE_DEVICES"]="2,3"
+os.environ["CUDA_VISIBLE_DEVICES"]="1,2,3"
 logging.basicConfig(level=logging.INFO)
 def get_arguments():
     """Parse all the arguments provided from the CLI.
@@ -50,7 +50,7 @@ def get_arguments():
     """
     parser = argparse.ArgumentParser(description="NAS Search")
 
-    parser.add_argument("--dataset_type", type=str, default= 'helen',#'EG1800',#'celebA-binary',
+    parser.add_argument("--dataset_type", type=str, default= 'celebA-face',#'helen','EG1800',#'celebA-binary',
                         help="dataset type to be trained or valued.")
 
     # Dataset
@@ -249,8 +249,9 @@ def main():
     # finetune_ckpt_path = './ckpt/_train_EG1800_20200217T1922/segmenter_checkpoint.pth.tar'
     #finetune_ckpt_path = './ckpt/_train_EG1800_20200218T1319/segmenter_checkpoint.pth.tar'
     #finetune_ckpt_path = './ckpt/_train_EG1800_20200218T2034/segmenter_checkpoint.pth.tar'
-    finetune_ckpt_path = './ckpt/_train_helen_20200223T1724/segmenter_checkpoint.pth.tar'
-    segmenter.load_state_dict(torch.load(finetune_ckpt_path))
+    # finetune_ckpt_path = './ckpt/_train_helen_20200223T1724/segmenter_checkpoint.pth.tar'
+    # finetune_ckpt_path = './ckpt/_train_celebA-face_20200225T1518/segmenter_checkpoint_0.20.pth.tar'
+    # segmenter.load_state_dict(torch.load(finetune_ckpt_path))
     logger.info(" Loaded Encoder with #TOTAL PARAMS={:3.2f}M"
                 .format(compute_params(segmenter)[0] / 1e6))
 
@@ -348,7 +349,7 @@ def main():
                 '''
                 pass
             else:
-                train_segmenter(segmenter,  #train the segmenter end to end onece
+                final_loss = train_segmenter(segmenter,  #train the segmenter end to end onece
                                 train_loader,
                                 optim_enc,
                                 optim_dec,
@@ -386,7 +387,7 @@ def main():
                     break
                 #reward = task_miou  # will be used in train_agent process
         # save the segmenter params
-    seg_saver.save(1, segmenter.state_dict(), logger) #stub to 1
+    seg_saver.save(final_loss, segmenter.state_dict(), logger) #stub to 1
 
 
 if __name__ == '__main__':

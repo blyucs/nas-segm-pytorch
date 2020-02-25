@@ -11,33 +11,36 @@ import matplotlib.pyplot as plt
 #label_list = ['skin', 'neck', 'hat', 'eye_g', 'hair', 'ear_r', 'neck_l', 'cloth', 'l_eye', 'r_eye', 'l_brow', 'r_brow', 'nose', 'l_ear', 'r_ear', 'mouth', 'u_lip', 'l_lip']
 #list2	 
 #label_list = ['skin', 'nose', 'eye_g', 'l_eye', 'r_eye', 'l_brow', 'r_brow', 'l_ear', 'r_ear', 'mouth', 'u_lip', 'l_lip', 'hair', 'hat', 'ear_r', 'neck_l', 'neck', 'cloth']
-label_list = ['skin', 'nose', 'eye_g', 'l_eye', 'r_eye', 'l_brow', 'r_brow', 'l_ear', 'r_ear', 'mouth', 'u_lip', 'l_lip', 'hair', 'hat',  'neck', 'cloth']
-
-folder_base = 'CelebAMask-HQ-mask-anno'
+# label_list = ['skin', 'nose', 'eye_g', 'l_eye', 'r_eye', 'l_brow', 'r_brow', 'l_ear', 'r_ear', 'mouth', 'u_lip', 'l_lip', 'hair', 'hat',  'neck', 'cloth']
+label_list = ['skin','r_brow','l_brow','r_eye','l_eye','nose','u_lip','mouth','l_lip','hair'] # face left and right define does not match in celebA and helen
+# gt_label_names = pred_label_names = ['bg','face','lb','rb','le','re','nose','ulip','imouth','llip','hair',]
+folder_base = '../../../data/datasets/celebA'
+folder_anno = 'CelebAMask-HQ-mask-anno'
 folder_save = 'CelebAMask-HQ-mask-face-seg'
 img_num = 30000
-folder_raw = 'CelebA-HQ-img'
+# folder_raw = 'CelebA-HQ-img'
 raw_save = 'CelebA-HA-img-resize'
-make_folder(folder_save)
-make_folder(raw_save)
+make_folder(os.path.join(folder_base,folder_save))
 
-image_id_list = open(os.path.join('.', 'train_face_seg.lst'), 'w')
+# make_folder(raw_save)
+
+image_id_list = open(os.path.join(folder_base,'train_face_seg.lst'), 'w')
 
 for k in range(img_num):
 	folder_num = k // 2000
 	im_base = np.zeros((512, 512))
 	for idx, label in enumerate(label_list):
-		filename = os.path.join(folder_base, str(folder_num), str(k).rjust(5, '0') + '_' + label + '.png')
+		filename = os.path.join(folder_base,folder_anno, str(folder_num), str(k).rjust(5, '0') + '_' + label + '.png')
 		if (os.path.exists(filename)):
 			#print (label, idx+1)
 			im = cv2.imread(filename)
 			im = im[:, :, 0]
 			im_base[im != 0] = (idx + 1)
-	filename_save = os.path.join(folder_save, str(k) + '.png')
+	filename_save = os.path.join(folder_base,folder_save, str(k) + '.png')
 	print (filename_save)
 	cv2.imwrite(filename_save, im_base)
 
-	raw_name = os.path.join(folder_raw, str(k) + '.jpg')
+	raw_name = os.path.join(folder_base,raw_save, str(k) + '.jpg')
 	if (os.path.exists(raw_name)):
 		# image=cv2.imread(raw_name)
 		# image=cv2.resize(image,(512,512),interpolation=cv2.INTER_CUBIC)

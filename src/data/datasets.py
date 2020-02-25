@@ -145,6 +145,28 @@ class ResizeShorterScale(object):
         return {'image': image, 'mask' : mask}
 
 
+class ValResizeShorterScale(object):
+    """Resize shorter side to a given value and randomly scale."""
+    #temp for val
+    def __init__(self, shorter_side, low_scale, high_scale):
+        assert isinstance(shorter_side, int)
+        self.shorter_side = shorter_side
+        self.low_scale = low_scale
+        self.high_scale = high_scale
+
+    def __call__(self, sample):
+        image, mask = sample['image'], sample['mask']
+        min_side = min(image.shape[:2])
+        scale = np.random.uniform(self.low_scale, self.high_scale)
+        if min_side * scale < self.shorter_side:
+            scale = (self.shorter_side * 1. / min_side)
+        # image = cv2.resize(image, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
+        # mask = cv2.resize(mask, None, fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST)
+        image = cv2.resize(image, (self.shorter_side, self.shorter_side),  interpolation=cv2.INTER_CUBIC)
+        mask = cv2.resize(mask, (self.shorter_side, self.shorter_side),  interpolation=cv2.INTER_NEAREST)
+        return {'image': image, 'mask' : mask}
+
+
 class RandomMirror(object):
     """Rescale the image in a sample to a given size.
 

@@ -263,3 +263,4 @@ def train_segmenter(
                     epoch, train_loader.batch_sampler.batch_size,len(train_loader),
                     losses.avg, batch_time.avg
                 ))
+    return losses.avg

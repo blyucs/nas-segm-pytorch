@@ -19,7 +19,7 @@ img_num = 30000
 folder_raw = 'CelebA-HQ-img'
 raw_save = 'CelebA-HA-img-resize'
 make_folder(folder_save)
-make_folder(raw_save)
+# make_folder(raw_save)
 
 image_id_list = open(os.path.join('.', 'train_all_class.lst'), 'w')
 

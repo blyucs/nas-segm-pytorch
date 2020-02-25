@@ -67,8 +67,14 @@ SEGMENTER_CKPT_PATH = \
         # 'EG1800': './ckpt/_train_EG1800_20200218T1842/segmenter_checkpoint.pth.tar',
         # 'EG1800': './ckpt/_train_EG1800_20200218T2034/segmenter_checkpoint.pth.tar',  #0.967
         'EG1800': './ckpt/_train_EG1800_20200218T2158/segmenter_checkpoint.pth.tar',  #0.873
-        # 'helen': './ckpt/_train_helen_20200223T1724/segmenter_checkpoint.pth.tar',  #0.873
-        'helen': './ckpt/_train_helen_20200224T1611/segmenter_checkpoint.pth.tar',  # 0.873
+        # 'helen': './ckpt/_train_helen_20200223T1724/segmenter_checkpoint.pth.tar',  #0.81
+        # 'helen': './ckpt/_train_helen_20200224T1611/segmenter_checkpoint.pth.tar',  # 0.81
+        # 'helen': './ckpt/_train_helen_20200225T1319/segmenter_checkpoint.pth.tar',  # no pre-trained mobilenetV2 poor performance
+        # 'helen': './ckpt/_train_celebA-face_20200225T1518/segmenter_checkpoint_0.20.pth.tar',  # no pre-trained mobilenetV2 poor performance
+        'helen': './ckpt/_train_celebA-face_20200225T1901/segmenter_checkpoint_0.14.pth.tar',  # no pre-trained mobilenetV2 poor performance
+        # 'celebA-face': './ckpt/_train_celebA-face_20200225T1518/segmenter_checkpoint_0.20.pth.tar',
+        'celebA-face': './ckpt/_train_celebA-face_20200225T1901/segmenter_checkpoint_0.14.pth.tar',
+        # no pre-trained mobilenetV2 poor performance
     }
 
 # decoder_config = [[0, [0, 0, 5, 6], [4, 3, 5, 5], [2, 7, 2, 5]], [[3, 3], [2, 3], [4, 0]]]
@@ -85,6 +91,7 @@ decoder_config = \
         'EG1800':[[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]], #0.9636 EG1800:
         'celebA-binary':[[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]], #0.9636 EG1800:
         'helen':[[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2]]],
+        'celebA-face': [[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2]]],
     }
 # decoder_config = [[10, [1, 0, 8, 10], [0, 1, 3, 2], [7, 1, 4, 3]], [[3, 0], [3, 4], [3, 2]]] #0.095 worst all cls
 # [[10, [1, 1, 5, 2], [3, 0, 3, 4], [6, 7, 5, 9]], [[0, 0], [4, 3], [3, 1]]] #0.1293 all cls
@@ -96,7 +103,7 @@ def get_arguments():
     """
     parser = argparse.ArgumentParser(description="NAS Search")
 
-    parser.add_argument("--dataset_type", type=str, default='helen',#'EG1800',#'celebA-binary',#'EG1800',
+    parser.add_argument("--dataset_type", type=str, default='celebA-face',#'helen',#'EG1800',#'celebA-binary',#'EG1800',
                         help="dataset type to be trained or valued.")
 
     # Dataset

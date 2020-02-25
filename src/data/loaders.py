@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader, random_split
 # Custom libraries
 from .datasets import PascalCustomDataset as Dataset
 from .datasets import CentralCrop, Normalise, \
-  RandomCrop, RandomMirror, ResizeShorterScale, ToTensor
+  RandomCrop, RandomMirror, ResizeShorterScale, ToTensor,ValResizeShorterScale
 
 from utils.default_args import *
 
@@ -36,14 +36,15 @@ def create_loaders(args):
     ## Transformations during training ##
     logger = logging.getLogger(__name__)
     composed_trn = transforms.Compose([
-        ResizeShorterScale(args.shorter_side[0], args.low_scale, args.high_scale),
-        #RandomMirror(),
-        RandomCrop(args.crop_size[0]),
+        # ResizeShorterScale(args.shorter_side[0], args.low_scale, args.high_scale),
+        # RandomMirror(),  #comment for left and right property
+        # RandomCrop(args.crop_size[0]),
         Normalise(*args.normalise_params),
         ToTensor()])
     composed_val = transforms.Compose([
-        ResizeShorterScale(args.val_shorter_side, 1, 1),
-        CentralCrop(args.val_crop_size),
+        # ResizeShorterScale(args.val_shorter_side, 1, 1),
+        # CentralCrop(args.val_crop_size),
+        ValResizeShorterScale(args.val_shorter_side, 1, 1),
         Normalise(*args.normalise_params),
         ToTensor()])
     ## Training and validation sets ##

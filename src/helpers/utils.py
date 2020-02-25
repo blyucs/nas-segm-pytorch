@@ -78,7 +78,7 @@ class seg_Saver():
         if self._do_save(new_val):
             logger.info(" New best reward {:.4f},pre-best reward was {:.4f}".format(new_val, self.best_val))
             self.best_val = new_val
-            torch.save(dict_to_save, '{}/segmenter_checkpoint.pth.tar'.format(self.ckpt_dir))
+            torch.save(dict_to_save, '{}/segmenter_checkpoint_{:.2f}.pth.tar'.format(self.ckpt_dir,new_val))
             return True
 
 class Saver():

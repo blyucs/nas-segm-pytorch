@@ -72,5 +72,6 @@ def mbv2(pretrained=False, **kwargs):
 
 
 def create_encoder(pretrained='voc'):
+# def create_encoder(pretrained=''):
     """Create Encoder"""
     return mbv2(pretrained=pretrained)
