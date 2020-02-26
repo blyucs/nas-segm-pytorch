@@ -39,13 +39,14 @@ def create_loaders(args):
         # ResizeShorterScale(args.shorter_side[0], args.low_scale, args.high_scale),
         # RandomMirror(),  #comment for left and right property
         # RandomCrop(args.crop_size[0]),
+        ValResizeShorterScale(args.val_shorter_side, 1, 1),
         Normalise(*args.normalise_params),
         ToTensor()])
     composed_val = transforms.Compose([
         # ResizeShorterScale(args.val_shorter_side, 1, 1),
         # CentralCrop(args.val_crop_size),
-        ValResizeShorterScale(args.val_shorter_side, 1, 1),
-        Normalise(*args.normalise_params),
+        # ValResizeShorterScale(args.val_shorter_side, 1, 1),
+        # Normalise(*args.normalise_params),
         ToTensor()])
     ## Training and validation sets ##
     trainset = Dataset(data_file=dataset_dirs[args.dataset_type]['TRAIN_LIST'],

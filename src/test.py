@@ -42,7 +42,7 @@ import cv2
 import matplotlib.pyplot as plt
 
 from utils.helpers import prepare_img
-os.environ["CUDA_VISIBLE_DEVICES"]="2,3"
+os.environ["CUDA_VISIBLE_DEVICES"]="3"
 logging.basicConfig(level=logging.INFO)
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -67,13 +67,17 @@ SEGMENTER_CKPT_PATH = \
         # 'EG1800': './ckpt/_train_EG1800_20200218T1842/segmenter_checkpoint.pth.tar',
         # 'EG1800': './ckpt/_train_EG1800_20200218T2034/segmenter_checkpoint.pth.tar',  #0.967
         'EG1800': './ckpt/_train_EG1800_20200218T2158/segmenter_checkpoint.pth.tar',  #0.873
-        # 'helen': './ckpt/_train_helen_20200223T1724/segmenter_checkpoint.pth.tar',  #0.81
+        'helen': './ckpt/_train_helen_20200223T1724/segmenter_checkpoint.pth.tar',  #0.81
         # 'helen': './ckpt/_train_helen_20200224T1611/segmenter_checkpoint.pth.tar',  # 0.81
         # 'helen': './ckpt/_train_helen_20200225T1319/segmenter_checkpoint.pth.tar',  # no pre-trained mobilenetV2 poor performance
-        # 'helen': './ckpt/_train_celebA-face_20200225T1518/segmenter_checkpoint_0.20.pth.tar',  # no pre-trained mobilenetV2 poor performance
-        'helen': './ckpt/_train_celebA-face_20200225T1901/segmenter_checkpoint_0.14.pth.tar',  # no pre-trained mobilenetV2 poor performance
+        # 'helen': './ckpt/_train_celebA-face_20200225T1518/segmenter_checkpoint_0.20.pth.tar',  #
+        # 'helen': './ckpt/_train_celebA-face_20200225T1901/segmenter_checkpoint_0.14.pth.tar',  #
+        # 'helen': './ckpt/_train_helen_20200225T2313/segmenter_checkpoint_0.14.pth.tar',  #pretrained by celeA
+        # 'helen': './ckpt/_train_helen_20200226T1234/segmenter_checkpoint_0.11.pth.tar',  #pretrained by celeA
+        # 'helen': './ckpt/_train_helen_20200226T1723/segmenter_checkpoint_0.10.pth.tar',  #pretrained by celeA loss:0.098
         # 'celebA-face': './ckpt/_train_celebA-face_20200225T1518/segmenter_checkpoint_0.20.pth.tar',
-        'celebA-face': './ckpt/_train_celebA-face_20200225T1901/segmenter_checkpoint_0.14.pth.tar',
+        # 'celebA-face': './ckpt/_train_celebA-face_20200225T1901/segmenter_checkpoint_0.14.pth.tar', # perfect performance in celebA-face
+        'celebA-face': './ckpt/_train_helen_20200226T1234/segmenter_checkpoint_0.11.pth.tar', #  test celeb-A with re-trained model by helen
         # no pre-trained mobilenetV2 poor performance
     }
 
@@ -103,7 +107,7 @@ def get_arguments():
     """
     parser = argparse.ArgumentParser(description="NAS Search")
 
-    parser.add_argument("--dataset_type", type=str, default='celebA-face',#'helen',#'EG1800',#'celebA-binary',#'EG1800',
+    parser.add_argument("--dataset_type", type=str, default= 'helen',#'celebA-face',#'EG1800',#'celebA-binary',#'EG1800',
                         help="dataset type to be trained or valued.")
 
     # Dataset
@@ -303,18 +307,22 @@ def main():
     msks = [os.path.join(data_dir,datalist[i][1]) for i in random_array]
 
     '''imgs = [
-        '../data/datasets/portrait_seg/EG1800/Images/00168.png',
-        '../data/datasets/portrait_seg/EG1800/Images/00324.png',
-        '../data/datasets/portrait_seg/EG1800/Images/00415.png',
-        '../data/datasets/portrait_seg/EG1800/Images/00633.png',
-        '../data/datasets/portrait_seg/EG1800/Images/00617.png',
+        # '../data/datasets/portrait_seg/EG1800/Images/00168.png',
+        # '../data/datasets/portrait_seg/EG1800/Images/00324.png',
+        # '../data/datasets/portrait_seg/EG1800/Images/00415.png',
+        # '../data/datasets/portrait_seg/EG1800/Images/00633.png',
+        # '../data/datasets/portrait_seg/EG1800/Images/00617.png',
+        '../data/datasets/helen/test_resize_single/114501272_1_image.jpg',
+        '../data/datasets/helen/test_resize_single/1195037433_1_image.jpg',
     ]
     msks = [
-        '../data/datasets/portrait_seg/EG1800/Labels/00168.png',
-        '../data/datasets/portrait_seg/EG1800/Labels/00324.png',
-        '../data/datasets/portrait_seg/EG1800/Labels/00415.png',
-        '../data/datasets/portrait_seg/EG1800/Labels/00633.png',
-        '../data/datasets/portrait_seg/EG1800/Labels/00617.png',
+        # '../data/datasets/portrait_seg/EG1800/Labels/00168.png',
+        # '../data/datasets/portrait_seg/EG1800/Labels/00324.png',
+        # '../data/datasets/portrait_seg/EG1800/Labels/00415.png',
+        # '../data/datasets/portrait_seg/EG1800/Labels/00633.png',
+        # '../data/datasets/portrait_seg/EG1800/Labels/00617.png',
+        '../data/datasets/helen/test_resize_single/114501272_1_label.png',
+        '../data/datasets/helen/test_resize_single/1195037433_1_label.png',
     ]'''
 
     show_raw_portrait_seg = 0

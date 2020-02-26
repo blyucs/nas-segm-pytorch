@@ -43,7 +43,7 @@ import matplotlib.pyplot as plt
 import shutil
 import cv2
 
-os.environ["CUDA_VISIBLE_DEVICES"]="2,3"
+os.environ["CUDA_VISIBLE_DEVICES"]="3"
 logging.basicConfig(level=logging.INFO)
 # TRAIN_EPOCH_NUM = {'celebA':[40,10],'EG1800':[0,50],'celebA-binary':[0,6]}
 
@@ -69,12 +69,15 @@ SEGMENTER_CKPT_PATH = \
         # 'EG1800': './ckpt/_train_EG1800_20200218T1842/segmenter_checkpoint.pth.tar',
         # 'EG1800': './ckpt/_train_EG1800_20200218T2034/segmenter_checkpoint.pth.tar', #0.967
         'EG1800': './ckpt/_train_EG1800_20200218T2158/segmenter_checkpoint.pth.tar',  # 0.873
-        # 'helen': './ckpt/_train_helen_20200223T1724/segmenter_checkpoint.pth.tar',  #
+        'helen': './ckpt/_train_helen_20200223T1724/segmenter_checkpoint.pth.tar',  #
         # 'helen': './ckpt/_train_helen_20200224T1611/segmenter_checkpoint.pth.tar',  # 0.81
         # 'helen': './ckpt/_train_helen_20200225T1251/segmenter_checkpoint.pth.tar',  # 0.873
         # 'helen': './ckpt/_train_helen_20200225T1319/segmenter_checkpoint.pth.tar',  # 0.7476  # no pre-trained mobilenetV2 poor performance
         # 'helen': './ckpt/_train_celebA-face_20200225T1518/segmenter_checkpoint_0.20.pth.tar',  #0.74176
-        'helen': './ckpt/_train_celebA-face_20200225T1901/segmenter_checkpoint_0.14.pth.tar',
+        # 'helen': './ckpt/_train_celebA-face_20200225T1901/segmenter_checkpoint_0.14.pth.tar',
+        # 'helen': './ckpt/_train_helen_20200225T2313/segmenter_checkpoint_0.14.pth.tar',
+        # 'helen': './ckpt/_train_helen_20200226T1234/segmenter_checkpoint_0.11.pth.tar',  #pretrained by celeA
+        # 'helen': './ckpt/_train_helen_20200226T1723/segmenter_checkpoint_0.10.pth.tar',  # pretrained by celeA
     }
 
 # decoder_config = [[0, [0, 0, 5, 6], [4, 3, 5, 5], [2, 7, 2, 5]], [[3, 3], [2, 3], [4, 0]]]
@@ -229,6 +232,8 @@ class Segmenter(nn.Module):
         return self.decoder(self.encoder(x))
 
 
+color_list = [[0, 0, 0], [204, 0, 0], [76, 153, 0], [204, 204, 0], [51, 51, 255], [204, 0, 204], [0, 255, 255], [255, 204, 204], [102, 51, 0], [255, 0, 0], [102, 204, 0], [255, 255, 0], [0, 0, 153], [0, 0, 204], [255, 51, 153], [0, 204, 204], [0, 51, 0], [255, 153, 51], [0, 204, 0]]
+
 def main():
     # Set-up experiment
     args = get_arguments()
@@ -276,6 +281,7 @@ def main():
     segmenter= create_segmenter(encoder)
     del encoder
 
+    color_array = np.array(color_list)
     segmenter.load_state_dict(torch.load(args.ckpt_path[args.dataset_type]))
     logger.info(" Loaded Encoder with #TOTAL PARAMS={:3.2f}M"
                 .format(compute_params(segmenter)[0] / 1e6))
@@ -301,6 +307,7 @@ def main():
             shutil.rmtree(validate_gt_dir)
             os.makedirs(validate_gt_dir)
         _out_type_1_ = 0 # helen validte type flag
+        save_color = 1
         for i,sample in enumerate(val_loader):
             for j in range(VAL_BATCH_SIZE[args.dataset_type]):
                 image = sample['image'] # 1x3x400x400
@@ -313,17 +320,27 @@ def main():
                     output = nn.Upsample(size=target.size()[1:], mode='bilinear',
                                          align_corners=False)(output) #1x11x400x400 float
                     # Compute IoU
-                    output = output.data.cpu().numpy().argmax(axis=1).astype(np.uint8) # 1x400x400 int:0-11
-                    cv2.imwrite(os.path.join(validate_output_dir, "{}.png".format(i)), output[0])
-                    cv2.imwrite(os.path.join(validate_gt_dir, "{}.png".format(i)), gt[0])
+                    image_name = val_loader.dataset.datalist[i][0].split('/')[1].split('.')[0]
+                    output = output.data.cpu().numpy().argmax(axis=1).astype(np.uint8)  # 1x400x400 int:0-11
+                    if save_color:
+                        cv2.imwrite(os.path.join(validate_output_dir, "{}.png".format(image_name)), color_array[output[0]])
+                        cv2.imwrite(os.path.join(validate_gt_dir, "{}.png".format(image_name)), color_array[gt[0]])
+                    else:
+                        cv2.imwrite(os.path.join(validate_output_dir, "{}.png".format(i)), output[0])
+                        cv2.imwrite(os.path.join(validate_gt_dir, "{}.png".format(i)), gt[0])
                 else:
                     if 1:
                         segm = segmenter(input_var)[0].squeeze().data.cpu().numpy().transpose((1, 2, 0))  # 47*63*21
                         # segm = cv2.resize(segm, tuple(target.size()[1:]), interpolation=cv2.INTER_CUBIC)  # 375*500*21
                         segm = cv2.resize(segm, target.size()[1:][::-1], interpolation=cv2.INTER_CUBIC)  # 375*500*21
                         segm = segm.argmax(axis=2).astype(np.uint8)
-                        cv2.imwrite(os.path.join(validate_output_dir,"{}.png".format(i)),segm)
-                        cv2.imwrite(os.path.join(validate_gt_dir,"{}.png".format(i)),gt[0])
+                        image_name = val_loader.dataset.datalist[i][0].split('/')[1].split('.')[0]
+                        if save_color:
+                            cv2.imwrite(os.path.join(validate_output_dir, "{}.png".format(image_name)), color_array[segm])
+                            cv2.imwrite(os.path.join(validate_gt_dir, "{}.png".format(image_name)), color_array[gt[0]])
+                        else:
+                            cv2.imwrite(os.path.join(validate_output_dir,"{}.png".format(image_name)),segm)
+                            cv2.imwrite(os.path.join(validate_gt_dir,"{}.png".format(image_name)),gt[0])
 
                     # segm = segmenter(input_var)[0].squeeze().data.cpu().numpy().transpose((1, 2, 0))  # 47*63*21
                     # # segm = cv2.resize(segm, target.size()[1:], interpolation=cv2.INTER_CUBIC)  # 375*500*21
@@ -334,7 +351,7 @@ def main():
                     # cv2.imwrite(os.path.join(validate_output_dir, "{}.png".format(i)), segm)
                     # cv2.imwrite(os.path.join(validate_gt_dir, "{}.png".format(i)), gto)
 
-        cal_f1_score(validate_gt_dir,validate_output_dir)
+        # cal_f1_score(validate_gt_dir,validate_output_dir)
 
         # if i > 50:
             #     break

@@ -42,9 +42,11 @@ dataset_dirs = {
             'VAL_DIR': '../data/datasets/helen/',
             # TRAIN_LIST = '../data/datasets/celebA/train_mini.lst'
             # VAL_LIST = '../data/datasets/celebA/train_mini.lst'  # meta learning
-            'TRAIN_LIST': '../data/datasets/helen/train.lst',
+            # 'TRAIN_LIST': '../data/datasets/helen/train.lst',
+            'TRAIN_LIST': '../data/datasets/helen/train_single.lst',
             # 'VAL_LIST': '../data/datasets/helen/val.lst'  # meta learning
-            'VAL_LIST': '../data/datasets/helen/val_single.lst'  # meta learning
+            'VAL_LIST': '../data/datasets/helen/val_single.lst',  # meta learning
+            # 'VAL_LIST': '../data/datasets/helen/train.lst',  # meta learning
         },
     'celebA-face':
         {
@@ -69,7 +71,7 @@ NORMALISE_PARAMS = [1./255, # SCALE
                     np.array([0.229, 0.224, 0.225]).reshape((1, 1, 3))] # STD
 BATCH_SIZE ={'celebA':[64, 128],'EG1800':[16,1],'celebA-binary':[64,16],'helen':[16,16],'celebA-face':[16,32]}
 NUM_WORKERS = 32
-TRAIN_EPOCH_NUM = {'celebA':[40,10],'EG1800':[0,20],'celebA-binary':[0,6],'helen':[0,1],'celebA-face':[0,10]}
+TRAIN_EPOCH_NUM = {'celebA':[40,10],'EG1800':[0,20],'celebA-binary':[0,6],'helen':[0,50],'celebA-face':[0,10]}
 
 NUM_CLASSES = {'face_seg':[11,11],'celebA':[19,19],'EG1800':[2,2],'celebA-binary':[2,2], 'helen':[11,11],'celebA-face':[11,11]}
 LOW_SCALE = 0.7
