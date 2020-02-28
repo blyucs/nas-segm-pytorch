@@ -223,7 +223,8 @@ def main():
             # decoder_config = [[1, [0, 0, 6, 0], [0, 3, 8, 3], [3, 0, 6, 3]], [[1, 2], [2, 4], [0, 4]]] #0.7137 all cls
             # decoder_config = [[10, [1, 0, 8, 10], [0, 1, 3, 2], [7, 1, 4, 3]], [[3, 0], [3, 4], [3, 2]]] #0.095 worst all cls
             # [[10, [1, 1, 5, 2], [3, 0, 3, 4], [6, 7, 5, 9]], [[0, 0], [4, 3], [3, 1]]] #0.1293 all cls
-            decoder_config = [[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2]]] # 0.7816 reward
+            # decoder_config = [[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2]]] # 0.7816 reward
+            decoder_config = [[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2],[0,2],[1,4]]] # 0.7816 reward
             # decoder_config = [[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]] #0.9636 EG1800
             #decoder_config = [[1, [1, 0, 3, 9], [2, 3, 4, 9], [2, 1, 1, 1]], [[1, 3], [2, 0], [0, 3]]]  #0.9636 EG1800
             #decoder_config = [[2, [1, 0, 10, 8], [2, 3, 1, 8], [2, 1, 2, 2]], [[3, 1], [2, 4], [5, 5]]]
@@ -249,7 +250,10 @@ def main():
     # finetune_ckpt_path = './ckpt/_train_EG1800_20200217T1922/segmenter_checkpoint.pth.tar'
     #finetune_ckpt_path = './ckpt/_train_EG1800_20200218T1319/segmenter_checkpoint.pth.tar'
     #finetune_ckpt_path = './ckpt/_train_EG1800_20200218T2034/segmenter_checkpoint.pth.tar'
-    finetune_ckpt_path = './ckpt/_train_helen_20200223T1724/segmenter_checkpoint.pth.tar'
+    # finetune_ckpt_path = './ckpt/_train_helen_20200223T1724/segmenter_checkpoint.pth.tar'
+    # finetune_ckpt_path = './ckpt/_train_helen_20200226T2358/segmenter_checkpoint_0.36.pth.tar'
+    # finetune_ckpt_path = './ckpt/_train_helen_20200227T2046/segmenter_checkpoint_0.37.pth.tar'
+    finetune_ckpt_path = './ckpt/_train_helen_20200228T1957/segmenter_checkpoint_0.31.pth.tar'
     # finetune_ckpt_path = './ckpt/_train_celebA-face_20200225T1518/segmenter_checkpoint_0.20.pth.tar'
     # finetune_ckpt_path = './ckpt/_train_celebA-face_20200225T1901/segmenter_checkpoint_0.14.pth.tar'
     segmenter.load_state_dict(torch.load(finetune_ckpt_path))
@@ -326,8 +330,8 @@ def main():
             args.wd_dec[task_idx],
             segmenter.module.encoder.parameters(),
             segmenter.module.decoder.parameters())
-        avg_param = init_polyak(
-            args.do_polyak, segmenter.module.decoder if task_idx == 0 else segmenter)
+        # avg_param = init_polyak(
+        #     args.do_polyak, segmenter.module.decoder if task_idx == 0 else segmenter)
         kd_crit = None #stub the kd
         for epoch_segm in range(TRAIN_EPOCH_NUM[args.dataset_type][task_idx]): #[5,1] [20,8]
             if task_idx == 0:
@@ -362,11 +366,11 @@ def main():
                                 args.do_polyak,
                                 args.print_every,
                                 aux_weight=args.dec_aux_weight,
-                                avg_param=avg_param,
+                                # avg_param=avg_param,
                                 polyak_decay=0.99)
-            apply_polyak(args.do_polyak,
-                         segmenter.module.decoder if task_idx == 0 else segmenter,
-                         avg_param)
+            # apply_polyak(args.do_polyak,
+            #              segmenter.module.decoder if task_idx == 0 else segmenter,
+            #              avg_param)
             #if (epoch_segm + 1) % (args.val_every[task_idx]) == 0:
             if False:
                 logger.info(

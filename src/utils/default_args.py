@@ -38,14 +38,22 @@ dataset_dirs = {
         },
     'helen':
         {
-            'TRAIN_DIR': '../data/datasets/helen/',
+            'TRAIN_DIR': '../data/datasets/helen',
+            # 'TRAIN_DIR': '../data/datasets/dhelen',
+            # 'TRAIN_DIR': '../data/datasets/',
             'VAL_DIR': '../data/datasets/helen/',
+            # 'VAL_DIR': '../data/datasets/dhelen/',
             # TRAIN_LIST = '../data/datasets/celebA/train_mini.lst'
             # VAL_LIST = '../data/datasets/celebA/train_mini.lst'  # meta learning
             # 'TRAIN_LIST': '../data/datasets/helen/train.lst',
             'TRAIN_LIST': '../data/datasets/helen/train_single.lst',
+            # 'TRAIN_LIST': '../data/datasets/dhelen/train.lst',
+            # 'TRAIN_LIST': '../data/datasets/helen_merge_celeba.lst',
             # 'VAL_LIST': '../data/datasets/helen/val.lst'  # meta learning
-            'VAL_LIST': '../data/datasets/helen/val_single.lst',  # meta learning
+            # 'VAL_LIST': '../data/datasets/helen/val_single.lst',  # meta learning
+            # 'VAL_LIST': '../data/datasets/helen/val_test.lst',  # meta learning
+            'VAL_LIST': '../data/datasets/helen/val_test_single.lst',  # meta learning
+            # 'VAL_LIST': '../data/datasets/dhelen/train.lst',  # meta learning
             # 'VAL_LIST': '../data/datasets/helen/train.lst',  # meta learning
         },
     'celebA-face':
@@ -69,9 +77,9 @@ CROP_SIZE = [256, 350]
 NORMALISE_PARAMS = [1./255, # SCALE
                     np.array([0.485, 0.456, 0.406]).reshape((1, 1, 3)), # MEAN
                     np.array([0.229, 0.224, 0.225]).reshape((1, 1, 3))] # STD
-BATCH_SIZE ={'celebA':[64, 128],'EG1800':[16,1],'celebA-binary':[64,16],'helen':[16,16],'celebA-face':[16,32]}
+BATCH_SIZE ={'celebA':[64, 128],'EG1800':[16,1],'celebA-binary':[64,16],'helen':[16,32],'celebA-face':[16,32]}
 NUM_WORKERS = 32
-TRAIN_EPOCH_NUM = {'celebA':[40,10],'EG1800':[0,20],'celebA-binary':[0,6],'helen':[0,50],'celebA-face':[0,10]}
+TRAIN_EPOCH_NUM = {'celebA':[40,10],'EG1800':[0,20],'celebA-binary':[0,6],'helen':[0,200],'celebA-face':[0,10]}
 
 NUM_CLASSES = {'face_seg':[11,11],'celebA':[19,19],'EG1800':[2,2],'celebA-binary':[2,2], 'helen':[11,11],'celebA-face':[11,11]}
 LOW_SCALE = 0.7
@@ -105,6 +113,7 @@ LR_DEC = [1e-2, 1e-2]
 
 # LR_ENC = [1e-4, 1e-4]# finetune
 # LR_DEC = [3e-4, 3e-4]#finetune
+# LR_DEC = [1e-4, 1e-4]#finetune
 
 LR_CTRL = 1e-4
 MOM_ENC = [0.9] * 3
@@ -118,7 +127,7 @@ OPTIM_ENC = 'sgd'
 AGENT_CTRL = 'ppo'
 DO_KD = False#True
 KD_COEFF = 0.3
-DO_POLYAK = True
+DO_POLYAK = False #True
 
 # CONTROLLER
 BL_DEC = 0.95

@@ -43,7 +43,9 @@ import matplotlib.pyplot as plt
 import shutil
 import cv2
 
+from utils.helpers import prepare_img
 os.environ["CUDA_VISIBLE_DEVICES"]="3"
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
 logging.basicConfig(level=logging.INFO)
 # TRAIN_EPOCH_NUM = {'celebA':[40,10],'EG1800':[0,50],'celebA-binary':[0,6]}
 
@@ -69,7 +71,7 @@ SEGMENTER_CKPT_PATH = \
         # 'EG1800': './ckpt/_train_EG1800_20200218T1842/segmenter_checkpoint.pth.tar',
         # 'EG1800': './ckpt/_train_EG1800_20200218T2034/segmenter_checkpoint.pth.tar', #0.967
         'EG1800': './ckpt/_train_EG1800_20200218T2158/segmenter_checkpoint.pth.tar',  # 0.873
-        'helen': './ckpt/_train_helen_20200223T1724/segmenter_checkpoint.pth.tar',  #
+        # 'helen': './ckpt/_train_helen_20200223T1724/segmenter_checkpoint.pth.tar',  #
         # 'helen': './ckpt/_train_helen_20200224T1611/segmenter_checkpoint.pth.tar',  # 0.81
         # 'helen': './ckpt/_train_helen_20200225T1251/segmenter_checkpoint.pth.tar',  # 0.873
         # 'helen': './ckpt/_train_helen_20200225T1319/segmenter_checkpoint.pth.tar',  # 0.7476  # no pre-trained mobilenetV2 poor performance
@@ -78,6 +80,9 @@ SEGMENTER_CKPT_PATH = \
         # 'helen': './ckpt/_train_helen_20200225T2313/segmenter_checkpoint_0.14.pth.tar',
         # 'helen': './ckpt/_train_helen_20200226T1234/segmenter_checkpoint_0.11.pth.tar',  #pretrained by celeA
         # 'helen': './ckpt/_train_helen_20200226T1723/segmenter_checkpoint_0.10.pth.tar',  # pretrained by celeA
+
+        'helen': './ckpt/_train_helen_20200226T2358/segmenter_checkpoint_0.36.pth.tar',
+        # pretrained by celeA loss:0.098
     }
 
 # decoder_config = [[0, [0, 0, 5, 6], [4, 3, 5, 5], [2, 7, 2, 5]], [[3, 3], [2, 3], [4, 0]]]
@@ -295,6 +300,7 @@ def main():
     if args.dataset_type == 'helen':
         validate_output_dir = os.path.join(dataset_dirs['helen']['VAL_DIR'], 'validate_output')
         validate_gt_dir = os.path.join(dataset_dirs['helen']['VAL_DIR'], 'validate_gt')
+        validate_color_dir = os.path.join(dataset_dirs['helen']['VAL_DIR'], 'validate_output_color')
         if not os.path.exists(validate_output_dir):
             os.makedirs(validate_output_dir)
         else:
@@ -306,13 +312,20 @@ def main():
         else:
             shutil.rmtree(validate_gt_dir)
             os.makedirs(validate_gt_dir)
-        _out_type_1_ = 0 # helen validte type flag
-        save_color = 1
+
+        if not os.path.exists(validate_color_dir):
+            os.makedirs(validate_color_dir)
+        else:
+            shutil.rmtree(validate_color_dir)
+            os.makedirs(validate_color_dir)
+        _out_type_1_ = 0# helen validte type flag
+        # save_color = 0
         for i,sample in enumerate(val_loader):
             for j in range(VAL_BATCH_SIZE[args.dataset_type]):
                 image = sample['image'] # 1x3x400x400
                 target = sample['mask'] # 1x400x400  int:0-11
                 gt = target.data.cpu().numpy().astype(np.uint8)  #1x400x400 int:0-11
+                input = image.data.cpu().numpy().astype(np.uint8)[0].transpose(1,2,0)  #1x400x400 int:0-11
                 input_var = torch.autograd.Variable(image).float().cuda()
                 if _out_type_1_:
                     # Compute output
@@ -322,25 +335,22 @@ def main():
                     # Compute IoU
                     image_name = val_loader.dataset.datalist[i][0].split('/')[1].split('.')[0]
                     output = output.data.cpu().numpy().argmax(axis=1).astype(np.uint8)  # 1x400x400 int:0-11
-                    if save_color:
-                        cv2.imwrite(os.path.join(validate_output_dir, "{}.png".format(image_name)), color_array[output[0]])
-                        cv2.imwrite(os.path.join(validate_gt_dir, "{}.png".format(image_name)), color_array[gt[0]])
-                    else:
-                        cv2.imwrite(os.path.join(validate_output_dir, "{}.png".format(i)), output[0])
-                        cv2.imwrite(os.path.join(validate_gt_dir, "{}.png".format(i)), gt[0])
+                    cv2.imwrite(os.path.join(validate_color_dir, "{}.png".format(image_name)), color_array[output[0]])
+                    # cv2.imwrite(os.path.join(validate_gt_dir, "{}.png".format(image_name)), color_array[gt[0]])
+                    cv2.imwrite(os.path.join(validate_output_dir, "{}.png".format(i)), output[0])
+                    cv2.imwrite(os.path.join(validate_gt_dir, "{}.png".format(i)), gt[0])
                 else:
                     if 1:
-                        segm = segmenter(input_var)[0].squeeze().data.cpu().numpy().transpose((1, 2, 0))  # 47*63*21
+                        img_inp = torch.tensor(prepare_img(input).transpose(2, 0, 1)[None]).float().to(device)
+                        segm = segmenter(img_inp)[0].squeeze().data.cpu().numpy().transpose((1, 2, 0))  # 47*63*21
                         # segm = cv2.resize(segm, tuple(target.size()[1:]), interpolation=cv2.INTER_CUBIC)  # 375*500*21
                         segm = cv2.resize(segm, target.size()[1:][::-1], interpolation=cv2.INTER_CUBIC)  # 375*500*21
                         segm = segm.argmax(axis=2).astype(np.uint8)
                         image_name = val_loader.dataset.datalist[i][0].split('/')[1].split('.')[0]
-                        if save_color:
-                            cv2.imwrite(os.path.join(validate_output_dir, "{}.png".format(image_name)), color_array[segm])
-                            cv2.imwrite(os.path.join(validate_gt_dir, "{}.png".format(image_name)), color_array[gt[0]])
-                        else:
-                            cv2.imwrite(os.path.join(validate_output_dir,"{}.png".format(image_name)),segm)
-                            cv2.imwrite(os.path.join(validate_gt_dir,"{}.png".format(image_name)),gt[0])
+                        cv2.imwrite(os.path.join(validate_color_dir, "{}.png".format(image_name)), color_array[segm])
+                        # cv2.imwrite(os.path.join(validate_gt_dir, "{}.png".format(image_name)), color_array[gt[0]])
+                        cv2.imwrite(os.path.join(validate_output_dir,"{}.png".format(image_name)),segm)
+                        cv2.imwrite(os.path.join(validate_gt_dir,"{}.png".format(image_name)),gt[0])
 
                     # segm = segmenter(input_var)[0].squeeze().data.cpu().numpy().transpose((1, 2, 0))  # 47*63*21
                     # # segm = cv2.resize(segm, target.size()[1:], interpolation=cv2.INTER_CUBIC)  # 375*500*21
@@ -351,7 +361,7 @@ def main():
                     # cv2.imwrite(os.path.join(validate_output_dir, "{}.png".format(i)), segm)
                     # cv2.imwrite(os.path.join(validate_gt_dir, "{}.png".format(i)), gto)
 
-        # cal_f1_score(validate_gt_dir,validate_output_dir)
+        cal_f1_score(validate_gt_dir,validate_output_dir)
 
         # if i > 50:
             #     break
