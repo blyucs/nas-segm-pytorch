@@ -68,7 +68,7 @@ SEGMENTER_CKPT_PATH = \
         # 'EG1800': './ckpt/_train_EG1800_20200218T1842/segmenter_checkpoint.pth.tar',
         # 'EG1800': './ckpt/_train_EG1800_20200218T2034/segmenter_checkpoint.pth.tar',  #0.967
         'EG1800': './ckpt/_train_EG1800_20200218T2158/segmenter_checkpoint.pth.tar',  #0.873
-        'helen': './ckpt/_train_helen_20200223T1724/segmenter_checkpoint.pth.tar',  #0.81
+        # 'helen': './ckpt/_train_helen_20200223T1724/segmenter_checkpoint.pth.tar',  #0.81
         # 'helen': './ckpt/_train_helen_20200224T1611/segmenter_checkpoint.pth.tar',  # 0.81
         # 'helen': './ckpt/_train_helen_20200225T1319/segmenter_checkpoint.pth.tar',  # no pre-trained mobilenetV2 poor performance
         # 'helen': './ckpt/_train_celebA-face_20200225T1518/segmenter_checkpoint_0.20.pth.tar',  #
@@ -84,8 +84,20 @@ SEGMENTER_CKPT_PATH = \
         # 'helen': './ckpt/_train_helen_20200227T1746/segmenter_checkpoint_0.33.pth.tar',  #  tain single batchsize 8
         # 'helen': './ckpt/_train_helen_20200227T1925/segmenter_checkpoint_0.35.pth.tar',  #  tain single batchsize 8
         # 'helen': './ckpt/_train_helen_20200227T2046/segmenter_checkpoint_0.37.pth.tar',  #  tain single batchsize 8
-        'helen': './ckpt/_train_helen_20200228T1957/segmenter_checkpoint_0.31.pth.tar',  #  tain single batchsize 8
-        # 'helen': './ckpt/_train_helen_20200228T1200/segmenter_checkpoint_0.27.pth.tar',  #  tain dhelen batchsize 32
+        # 'helen': './ckpt/_train_helen_20200228T1957/segmenter_checkpoint_0.31.pth.tar',  #  tain single batchsize 8
+        # 'helen': './ckpt/_train_helen_20200228T2101/segmenter_checkpoint_0.30.pth.tar',  #  tain single batchsize 8 the best 90.3
+        # 'helen': './ckpt/_train_helen_20200228T1200/segmenter_checkpoint_0.27.pth.tar',  #
+        # 'helen': './ckpt/_train_helen_20200228T2310/segmenter_checkpoint_0.34.pth.tar',  #
+        # 'helen': './ckpt/_train_helen_20200229T1700/segmenter_checkpoint_0.35.pth.tar',  #
+        # 'helen': './ckpt/_train_helen_20200229T1940/segmenter_checkpoint_0.22.pth.tar',  #
+        # 'helen': './ckpt/_train_helen_20200301T1545/segmenter_checkpoint_0.28.pth.tar',  #
+        # 'helen': './ckpt/_train_helen_20200301T2109/segmenter_checkpoint_0.34.pth.tar',  #
+        # 'helen': './ckpt/_train_helen_20200302T1943/segmenter_checkpoint_0.32.pth.tar',  #
+        # 'helen': './ckpt/_train_helen_20200302T2201/segmenter_checkpoint_0.27.pth.tar',  #
+        # 'helen': './ckpt/_train_helen_20200303T1147/segmenter_checkpoint_0.26.pth.tar',  #
+        'helen': './ckpt/_train_helen_20200303T2336/segmenter_checkpoint_0.25.pth.tar',  #
+        # 'helen_nohair': './ckpt/_train_helen_nohair_20200303T1416/segmenter_checkpoint_0.19.pth.tar',  #
+        'helen_nohair': './ckpt/_train_helen_nohair_20200303T1646/segmenter_checkpoint_0.14.pth.tar',  #
         # 'celebA-face': './ckpt/_train_celebA-face_20200225T1518/segmenter_checkpoint_0.20.pth.tar',
         # 'celebA-face': './ckpt/_train_celebA-face_20200225T1901/segmenter_checkpoint_0.14.pth.tar', # perfect performance in celebA-face
         'celebA-face': './ckpt/_train_helen_20200226T1234/segmenter_checkpoint_0.11.pth.tar', #  test celeb-A with re-trained model by helen
@@ -106,7 +118,10 @@ decoder_config = \
         'EG1800':[[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]], #0.9636 EG1800:
         'celebA-binary':[[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]], #0.9636 EG1800:
         # 'helen':[[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2]]],
-        'helen':[[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2],[0,2],[1,4]]],
+        'helen':[[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2],[0,2],[1,4]]], #cur the best
+        'helen_nohair':[[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2],[0,2],[1,4]]], #cur the best
+        # 'helen':[[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2],[0,2],[1,4],[0,3]]], #0.89
+        # 'helen':[[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2],[0,2],[1,4],[1,5]]], #0.89
         # 'helen':[[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2],[0,2]]],
         'celebA-face': [[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2]]],
     }
@@ -372,10 +387,10 @@ def main():
             # print(segm.shape)
     # plt.show()
 
-    if args.dataset_type == 'helen':
-        validate_output_dir = os.path.join(dataset_dirs['helen']['VAL_DIR'], 'validate_output')
-        validate_gt_dir = os.path.join(dataset_dirs['helen']['VAL_DIR'], 'validate_gt')
-        validate_color_dir = os.path.join(dataset_dirs['helen']['VAL_DIR'], 'validate_output_color')
+    if args.dataset_type == 'helen' or args.dataset_type == 'helen_nohair':
+        validate_output_dir = os.path.join(dataset_dirs[args.dataset_type]['VAL_DIR'], 'validate_output')
+        validate_gt_dir = os.path.join(dataset_dirs[args.dataset_type]['VAL_DIR'], 'validate_gt')
+        validate_color_dir = os.path.join(dataset_dirs[args.dataset_type]['VAL_DIR'], 'validate_output_color')
 
         if not os.path.exists(validate_output_dir):
             os.makedirs(validate_output_dir)

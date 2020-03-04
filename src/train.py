@@ -225,6 +225,7 @@ def main():
             # [[10, [1, 1, 5, 2], [3, 0, 3, 4], [6, 7, 5, 9]], [[0, 0], [4, 3], [3, 1]]] #0.1293 all cls
             # decoder_config = [[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2]]] # 0.7816 reward
             decoder_config = [[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2],[0,2],[1,4]]] # 0.7816 reward
+            # decoder_config = [[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2],[0,2],[1,4],[0,3]]] # 0.7816 reward
             # decoder_config = [[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]] #0.9636 EG1800
             #decoder_config = [[1, [1, 0, 3, 9], [2, 3, 4, 9], [2, 1, 1, 1]], [[1, 3], [2, 0], [0, 3]]]  #0.9636 EG1800
             #decoder_config = [[2, [1, 0, 10, 8], [2, 3, 1, 8], [2, 1, 2, 2]], [[3, 1], [2, 4], [5, 5]]]
@@ -253,7 +254,11 @@ def main():
     # finetune_ckpt_path = './ckpt/_train_helen_20200223T1724/segmenter_checkpoint.pth.tar'
     # finetune_ckpt_path = './ckpt/_train_helen_20200226T2358/segmenter_checkpoint_0.36.pth.tar'
     # finetune_ckpt_path = './ckpt/_train_helen_20200227T2046/segmenter_checkpoint_0.37.pth.tar'
-    finetune_ckpt_path = './ckpt/_train_helen_20200228T1957/segmenter_checkpoint_0.31.pth.tar'
+    # finetune_ckpt_path = './ckpt/_train_helen_20200228T1957/segmenter_checkpoint_0.31.pth.tar'
+    # finetune_ckpt_path = './ckpt/_train_helen_20200228T2101/segmenter_checkpoint_0.30.pth.tar'
+    # finetune_ckpt_path = './ckpt/_train_helen_20200301T1545/segmenter_checkpoint_0.28.pth.tar'
+    finetune_ckpt_path = './ckpt/_train_helen_20200302T2201/segmenter_checkpoint_0.27.pth.tar'
+    # finetune_ckpt_path = './ckpt/_train_helen_nohair_20200303T1416/segmenter_checkpoint_0.19.pth.tar'
     # finetune_ckpt_path = './ckpt/_train_celebA-face_20200225T1518/segmenter_checkpoint_0.20.pth.tar'
     # finetune_ckpt_path = './ckpt/_train_celebA-face_20200225T1901/segmenter_checkpoint_0.14.pth.tar'
     segmenter.load_state_dict(torch.load(finetune_ckpt_path))
@@ -280,8 +285,7 @@ def main():
     #               ckpt_dir=args.snapshot_dir,
     #               best_val=best_val,
     #               condition=lambda x, y: x > y)
-    seg_saver=seg_Saver(ckpt_dir=args.snapshot_dir,
-                        condition=lambda  x, y:x > y)
+    seg_saver=seg_Saver(ckpt_dir=args.snapshot_dir)
 
     arch_writer = open('{}/genotypes.out'.format(args.snapshot_dir), 'w')
     arch_writer.write(
@@ -391,7 +395,8 @@ def main():
                     stop = True
                     break
                 #reward = task_miou  # will be used in train_agent process
-        # save the segmenter params
+            # save the segmenter params with the best value
+            # seg_saver.save(final_loss, segmenter.state_dict(), logger) #stub to 1
     seg_saver.save(final_loss, segmenter.state_dict(), logger) #stub to 1
 
 

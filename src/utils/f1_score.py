@@ -38,6 +38,7 @@ def _merge(*list_pairs):
     return a, b
 
 gt_label_names = pred_label_names = ['bg','face','lb','rb','le','re','nose','ulip','imouth','llip','hair',]
+# gt_label_names = pred_label_names = ['bg','face','lb','rb','le','re','nose','ulip','imouth','llip',] #nohair
 
 def cal_f1_score(gt_dir,pred_dir):
 

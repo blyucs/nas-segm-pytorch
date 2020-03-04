@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader, random_split
 # Custom libraries
 from .datasets import PascalCustomDataset as Dataset
 from .datasets import CentralCrop, Normalise, \
-  RandomCrop, RandomMirror, ResizeShorterScale, ToTensor,ValResizeShorterScale
+  RandomCrop, RandomMirror, ResizeShorterScale, ToTensor,ValResizeShorterScale,RandomRotate
 
 from utils.default_args import *
 
@@ -38,7 +38,9 @@ def create_loaders(args):
     composed_trn = transforms.Compose([
         ResizeShorterScale(args.shorter_side[0], args.low_scale, args.high_scale), # resize must be use with crop to make the image square
         # RandomMirror(),  #comment for left and right property
+        # RandomRotate(),
         RandomCrop(args.crop_size[0]),
+	    # RandomRotate(),
         # ValResizeShorterScale(args.val_shorter_side, 1, 1),
         Normalise(*args.normalise_params),
         ToTensor()])

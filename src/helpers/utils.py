@@ -53,12 +53,12 @@ def apply_cmap(inp, cmap):
 
 class seg_Saver():
     """Saver class for managing parameters"""
-    def __init__(self, ckpt_dir,  condition=lambda x, y: x > y):
+    def __init__(self, ckpt_dir,  condition=lambda x, y: x < y):
         """
         Args:
             args (dict): dictionary with arguments.
             ckpt_dir (str): path to directory in which to store the checkpoint.
-            best_val (float): initial best value.
+            best_val (float): initial best value.  loss
             condition (function): how to decide whether to save the new checkpoint
                                     by comparing best value and new value (x,y).
 
@@ -66,7 +66,7 @@ class seg_Saver():
         if not os.path.exists(ckpt_dir):
             os.makedirs(ckpt_dir)
         self.ckpt_dir = ckpt_dir
-        self.best_val = 0
+        self.best_val = 1.0
         self.condition = condition
 
     def _do_save(self, new_val):

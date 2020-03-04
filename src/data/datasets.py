@@ -11,7 +11,7 @@ import numpy as np
 import torch
 from PIL import Image
 from torch.utils.data import Dataset
-
+import math
 import matplotlib.pyplot as plt
 
 def make_even(x):
@@ -186,6 +186,41 @@ class RandomMirror(object):
             mask = cv2.flip(mask, 1)
         return {'image': image, 'mask' : mask}
 
+class RandomRotate(object):
+    def __init__(self,scale = 1.):
+        # self.low_angle = low_angle
+        # self.high_angle = high_angle
+        self.scale = scale
+        self.angle_list = [-45,-30, 0, 0, 0, 0, 0, 30,45]
+
+    #旋转图像的函数
+    def __call__(self, sample):
+        image, mask = sample['image'], sample['mask']
+        w = image.shape[1]
+        h = image.shape[0]
+        # 角度变弧度
+        angle = self.angle_list[np.random.randint(0,len(self.angle_list))]
+        rangle = np.deg2rad(angle)  # angle in radians
+        # now calculate new image width and height
+        nw = (abs(np.sin(rangle)*h) + abs(np.cos(rangle)*w))*self.scale
+        nh = (abs(np.cos(rangle)*h) + abs(np.sin(rangle)*w))*self.scale
+        # ask OpenCV for the rotation matrix
+        rot_mat = cv2.getRotationMatrix2D((nw*0.5, nh*0.5), angle, self.scale)
+        # calculate the move from the old center to the new center combined
+        # with the rotation
+        rot_move = np.dot(rot_mat, np.array([(nw-w)*0.5, (nh-h)*0.5,0]))
+        # the move only affects the translation, so update the translation
+        # part of the transform
+        rot_mat[0,2] += rot_move[0]
+        rot_mat[1,2] += rot_move[1]
+        # 仿射变换
+        image_rot = cv2.warpAffine(image, rot_mat, (int(math.ceil(nw)), int(math.ceil(nh))), flags=cv2.INTER_LINEAR)
+        mask_rot =  cv2.warpAffine(mask, rot_mat, (int(math.ceil(nw)), int(math.ceil(nh))), flags=cv2.INTER_LINEAR)
+        # plt.imshow(image_rot)
+        # plt.show()
+        # plt.imshow(mask_rot)
+        # plt.show()
+        return {'image': image_rot, 'mask': mask_rot}
 
 class Normalise(object):
     """Normalise an tensor image with mean and standard deviation.
