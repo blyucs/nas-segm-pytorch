@@ -50,7 +50,13 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 cmap = np.load('./utils/cmap.npy')
 SEGMENTER_CKPT_PATH = \
     {
-        'celebA':'./ckpt/20200111T1841/segmenter_checkpoint.pth.tar',
+        # 'celebA':'./ckpt/20200111T1841/segmenter_checkpoint.pth.tar',
+        # 'celebA':'./ckpt/_train_celebA_20200304T2257/segmenter_checkpoint_0.22.pth.tar',  # 19 classes
+        'celebA':'./ckpt/_train_celebA_20200305T1410/segmenter_checkpoint_0.21.pth.tar',  # 19 classes
+        # 'celebA':'./ckpt/_train_celebA_20200305T1556/segmenter_checkpoint_0.31.pth.tar',  # 19 classes
+        # 'celebA':'./ckpt/_train_celebA_20200305T1653/segmenter_checkpoint_0.24.pth.tar',  # 19 classes
+        'celebA':'./ckpt/_train_celebA_20200305T1751/segmenter_checkpoint_0.25.pth.tar',  # 19 classes
+        # 'celebA':'./ckpt/_train_celebA_20200305T2113/segmenter_checkpoint_0.22.pth.tar',  # 19 classes
         #'EG1800':'./ckpt/train20200117T1958/segmenter_checkpoint.pth.tar'
         #'EG1800':'./ckpt/train20200118T1128/segmenter_checkpoint.pth.tar' , # 00079,00094,good, the best model currently
         #'EG1800': './ckpt/_train_EG1800_20200217T1059/segmenter_checkpoint.pth.tar',
@@ -66,8 +72,8 @@ SEGMENTER_CKPT_PATH = \
         # 'EG1800': './ckpt/_train_EG1800_20200218T1503/segmenter_checkpoint.pth.tar',
         #'EG1800': './ckpt/_train_EG1800_20200218T1606/segmenter_checkpoint.pth.tar',
         # 'EG1800': './ckpt/_train_EG1800_20200218T1842/segmenter_checkpoint.pth.tar',
-        # 'EG1800': './ckpt/_train_EG1800_20200218T2034/segmenter_checkpoint.pth.tar',  #0.967
-        'EG1800': './ckpt/_train_EG1800_20200218T2158/segmenter_checkpoint.pth.tar',  #0.873
+        'EG1800': './ckpt/_train_EG1800_20200218T2034/segmenter_checkpoint.pth.tar',  #0.967
+        # 'EG1800': './ckpt/_train_EG1800_20200218T2158/segmenter_checkpoint.pth.tar',  #0.873
         # 'helen': './ckpt/_train_helen_20200223T1724/segmenter_checkpoint.pth.tar',  #0.81
         # 'helen': './ckpt/_train_helen_20200224T1611/segmenter_checkpoint.pth.tar',  # 0.81
         # 'helen': './ckpt/_train_helen_20200225T1319/segmenter_checkpoint.pth.tar',  # no pre-trained mobilenetV2 poor performance
@@ -112,7 +118,10 @@ SEGMENTER_CKPT_PATH = \
 # decoder_config = [[1, [0, 0, 6, 0], [0, 3, 8, 3], [3, 0, 6, 3]], [[1, 2], [2, 4], [0, 4]]] #0.7137 all cls
 decoder_config = \
     {
-        'celebA':[[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2]]],  # 0.803
+        # 'celebA':[[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2]]],  # 0.803
+        # 'celebA':[[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2], [0,2], [1,4]]],  # 0.803
+        # 'celebA': [[1, [1, 1, 5, 5], [1, 0, 2, 7], [1, 4, 7, 5]], [[2, 1], [3, 0], [3, 2]]] ,  #
+        'celebA':  [[3, [1, 1, 5, 0], [0, 4, 1, 9], [4, 3, 2, 0]], [[3, 3], [2, 1], [2, 0], [1,4]]] ,  #
         #'EG1800':[[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]], #0.9636 EG1800
         # 'EG1800': [[2, [1, 0, 10, 8], [2, 3, 1, 8], [2, 1, 2, 2]], [[3, 1], [2, 4], [5, 5]]],
         'EG1800':[[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]], #0.9636 EG1800:
@@ -135,7 +144,7 @@ def get_arguments():
     """
     parser = argparse.ArgumentParser(description="NAS Search")
 
-    parser.add_argument("--dataset_type", type=str, default= 'helen',#'celebA-face',#'EG1800',#'celebA-binary',#'EG1800',
+    parser.add_argument("--dataset_type", type=str, default= 'celebA',#'helen',#'celebA-binary',#'EG1800',
                         help="dataset type to be trained or valued.")
 
     # Dataset
@@ -303,8 +312,9 @@ def main():
 
     segmenter.eval()
 
-    TEST_NUM = 5
-    fig, axes = plt.subplots(TEST_NUM, 3, figsize=(12, 12))
+    TEST_NUM = 4 # 6
+    fig, axes = plt.subplots(3, TEST_NUM, figsize=(12, 12))
+    # axes.set_xticks
     ax= axes.ravel()
     color_array = np.array(color_list)
     random.seed()
@@ -331,46 +341,89 @@ def main():
             (k, k) for k in map(lambda x: x.decode('utf-8').strip('\n'), datalist)]
 
     random_array = random.sample(range(0,len(datalist)),TEST_NUM)
-    imgs = [os.path.join(data_dir,datalist[i][0]) for i in random_array]
-    msks = [os.path.join(data_dir,datalist[i][1]) for i in random_array]
+    # imgs = [os.path.join(data_dir,datalist[i][0]) for i in random_array]
+    # msks = [os.path.join(data_dir,datalist[i][1]) for i in random_array]
 
     imgs_all = [os.path.join(data_dir,datalist[i][0]) for i in range(0,len(datalist))]
     msks_all = [os.path.join(data_dir,datalist[i][1]) for i in range(0,len(datalist))]
 
-    '''imgs = [
-        # '../data/datasets/portrait_seg/EG1800/Images/00168.png',
-        # '../data/datasets/portrait_seg/EG1800/Images/00324.png',
-        # '../data/datasets/portrait_seg/EG1800/Images/00415.png',
-        # '../data/datasets/portrait_seg/EG1800/Images/00633.png',
-        # '../data/datasets/portrait_seg/EG1800/Images/00617.png',
-        '../data/datasets/helen/test_resize_single/114501272_1_image.jpg',
-        '../data/datasets/helen/test_resize_single/1195037433_1_image.jpg',
+    imgs = [
+        # '../data/datasets/EG1800/Images/02323.png', # EG1800
+        # '../data/datasets/EG1800/Images/01232.png',
+        # '../data/datasets/EG1800/Images/02178.png',
+        # '../data/datasets/EG1800/Images/02033.png',
+        # '../data/datasets/EG1800/Images/02235.png',
+        # '../data/datasets/EG1800/Images/00105.png',
+        # '../data/datasets/helen/test/141794264_1_image.jpg',   #HELEN
+        # '../data/datasets/helen/test/107635070_1_image.jpg',
+        # '../data/datasets/helen/test/1030333538_1_image.jpg',
+        # '../data/datasets/helen/test/122276700_1_image.jpg',
+        # '../data/datasets/helen/test/1344304961_1_image.jpg',
+        # '../data/datasets/helen/test/1240746154_1_image.jpg',
+        # '../data/datasets/celebA/CelebA-HA-img-resize/29044.jpg',  #celebA
+        # '../data/datasets/celebA/CelebA-HA-img-resize/27039.jpg',
+        # '../data/datasets/celebA/CelebA-HA-img-resize/27047.jpg',
+        # '../data/datasets/celebA/CelebA-HA-img-resize/27037.jpg',
+        # '../data/datasets/celebA/CelebA-HA-img-resize/29045.jpg',
+        # '../data/datasets/celebA/CelebA-HA-img-resize/29022.jpg',
+        # '../data/datasets/celebA/CelebA-HA-img-resize/29312.jpg',  #celebA-generilize
+        '../data/datasets/celebA/CelebA-HA-img-resize/27039.jpg',
+        # '../data/datasets/celebA/CelebA-HA-img-resize/29097.jpg',
+        '../data/datasets/celebA/CelebA-HA-img-resize/29085.jpg',
+        '../data/datasets/celebA/CelebA-HA-img-resize/29068.jpg',
+        '../data/datasets/celebA/CelebA-HA-img-resize/29039.jpg',
+	    # '../data/datasets/celebA/CelebA-HA-img-resize/29080.jpg',
     ]
     msks = [
-        # '../data/datasets/portrait_seg/EG1800/Labels/00168.png',
-        # '../data/datasets/portrait_seg/EG1800/Labels/00324.png',
-        # '../data/datasets/portrait_seg/EG1800/Labels/00415.png',
-        # '../data/datasets/portrait_seg/EG1800/Labels/00633.png',
-        # '../data/datasets/portrait_seg/EG1800/Labels/00617.png',
-        '../data/datasets/helen/test_resize_single/114501272_1_label.png',
-        '../data/datasets/helen/test_resize_single/1195037433_1_label.png',
-    ]'''
+        # '../data/datasets/EG1800/Labels/02323.png',  # EG1800
+        # '../data/datasets/EG1800/Labels/01232.png',
+        # '../data/datasets/EG1800/Labels/02178.png',
+        # '../data/datasets/EG1800/Labels/02033.png',
+        # '../data/datasets/EG1800/Labels/02235.png',
+        # '../data/datasets/EG1800/Labels/00105.png',
+        # '../data/datasets/helen/test/141794264_1_label.png',  # HELEN
+        # '../data/datasets/helen/test/107635070_1_label.png',
+        # '../data/datasets/helen/test/1030333538_1_label.png',
+        # '../data/datasets/helen/test/122276700_1_label.png',
+        # '../data/datasets/helen/test/1344304961_1_label.png',
+        # '../data/datasets/helen/test/1240746154_1_label.png'
+        # '../data/datasets/celebA/CelebAMask-HQ-mask-all-class/29044.png',  #celebA
+        # '../data/datasets/celebA/CelebAMask-HQ-mask-all-class/27039.png',
+        # '../data/datasets/celebA/CelebAMask-HQ-mask-all-class/27047.png',
+        # '../data/datasets/celebA/CelebAMask-HQ-mask-all-class/27037.png',
+        # '../data/datasets/celebA/CelebAMask-HQ-mask-all-class/29045.png',
+        # '../data/datasets/celebA/CelebAMask-HQ-mask-all-class/29022.png',
+	    # '../data/datasets/celebA/CelebAMask-HQ-mask-all-class/29312.png',  #celebA -generilize
+	    '../data/datasets/celebA/CelebAMask-HQ-mask-all-class/27039.png',
+	    # '../data/datasets/celebA/CelebAMask-HQ-mask-all-class/29097.png',
+	    '../data/datasets/celebA/CelebAMask-HQ-mask-all-class/29085.png',
+	    '../data/datasets/celebA/CelebAMask-HQ-mask-all-class/29068.png',
+	    '../data/datasets/celebA/CelebAMask-HQ-mask-all-class/29039.png',
+	    # '../data/datasets/celebA/CelebAMask-HQ-mask-all-class/29080.png',
+    ]
 
-    show_raw_portrait_seg = 0
+    show_raw_portrait_seg = 1
     for i,img_path in enumerate(imgs):
         logger.info("Testing image:{}".format(img_path))
         img = np.array(Image.open(img_path))
         msk = np.array(Image.open(msks[i]))
         orig_size = img.shape[:2][::-1]
-        ax[3*i].imshow(img,aspect='auto')
+        ax[i].imshow(img,aspect='auto')
+        plt.axis('off')
         if args.dataset_type =='EG1800' and show_raw_portrait_seg:
             img_msk = img.copy()
             img_msk[msk == 0] = 0
-            ax[3*i+1].imshow(img_msk,aspect='auto')
-        else:
-            ax[3*i+1].imshow(img,aspect='auto')
+            ax[TEST_NUM+i].imshow(img_msk,aspect='auto')
+        elif args.dataset_type == 'helen' or args.dataset_type == 'helen_nohair':
+            ax[TEST_NUM+i].imshow(img,aspect='auto')
             msk = color_array[msk]
-            ax[3*i+1].imshow(msk,aspect='auto',alpha=0.7)
+            ax[TEST_NUM+i].imshow(msk,aspect='auto',alpha=0.7)
+        else:
+            # ax[3*i+1].imshow(img,aspect='auto')
+            msk = color_array[msk]
+            ax[TEST_NUM+i].imshow(msk,aspect='auto',)
+
+        plt.axis('off')
 
         img_inp = torch.tensor(prepare_img(img).transpose(2, 0, 1)[None]).float().to(device)
         segm = segmenter(img_inp)[0].squeeze().data.cpu().numpy().transpose((1, 2, 0)) #47*63*21
@@ -379,15 +432,23 @@ def main():
         if args.dataset_type =='EG1800'  and show_raw_portrait_seg:
             img_segm = img.copy()
             img_segm[segm == 0] = 0
-            ax[3*i+2].imshow(img_segm,aspect='auto')
-        else:
+            ax[2*TEST_NUM+i].imshow(img_segm,aspect='auto')
+        elif args.dataset_type == 'helen' or args.dataset_type == 'helen_nohair':
             segm = color_array[segm]  #375*500*3  #wath this usage ,very very important
-            ax[3*i+2].imshow(img,aspect='auto')
-            ax[3*i+2].imshow(segm,aspect='auto',alpha=0.7)
+            ax[2*TEST_NUM+i].imshow(img,aspect='auto')
+            ax[2*TEST_NUM+i].imshow(segm,aspect='auto',alpha=0.7)
             # print(segm.shape)
-    # plt.show()
+        else:
+            segm = color_array[segm]  # 375*500*3  #wath this usage ,very very important
+            # ax[3 * i + 2].imshow(img, aspect='auto')
+            ax[2*TEST_NUM+i].imshow(segm, aspect='auto',)
+            ax[2*TEST_NUM+i].set_xticks([])
+            ax[2*TEST_NUM+i].set_yticks([])
+        plt.axis('off')
+    plt.setp(plt.gcf().get_axes(), xticks=[], yticks=[])
+    plt.show()
 
-    if args.dataset_type == 'helen' or args.dataset_type == 'helen_nohair':
+    if args.dataset_type == 'helen' or args.dataset_type == 'helen_nohair' or args.dataset_type == 'celebA':
         validate_output_dir = os.path.join(dataset_dirs[args.dataset_type]['VAL_DIR'], 'validate_output')
         validate_gt_dir = os.path.join(dataset_dirs[args.dataset_type]['VAL_DIR'], 'validate_gt')
         validate_color_dir = os.path.join(dataset_dirs[args.dataset_type]['VAL_DIR'], 'validate_output_color')
@@ -412,14 +473,18 @@ def main():
 
         # save_color = 0
         for i, img_path in enumerate(imgs_all):
-            logger.info("Testing image:{}".format(img_path))
+            # logger.info("Testing image:{}".format(img_path))
             img = np.array(Image.open(img_path))
             msk = np.array(Image.open(msks_all[i]))
             orig_size = img.shape[:2][::-1]
 
             img_inp = torch.tensor(prepare_img(img).transpose(2, 0, 1)[None]).float().to(device)
             segm = segmenter(img_inp)[0].squeeze().data.cpu().numpy().transpose((1, 2, 0))  # 47*63*21
-            segm = cv2.resize(segm, orig_size, interpolation=cv2.INTER_CUBIC)  # 375*500*21
+            if args.dataset_type == 'celebA':
+                # msk = cv2.resize(msk,segm.shape[0:2],interpolation=cv2.INTER_NEAREST)
+                segm = cv2.resize(segm, orig_size, interpolation=cv2.INTER_CUBIC)  # 375*500*21
+            else:
+                segm = cv2.resize(segm, orig_size, interpolation=cv2.INTER_CUBIC)  # 375*500*21
             segm = segm.argmax(axis=2).astype(np.uint8)
 
             image_name = img_path.split('/')[-1].split('.')[0]
@@ -429,11 +494,14 @@ def main():
             cv2.imwrite(os.path.join(validate_output_dir, "{}.png".format(image_name)), segm)
             cv2.imwrite(os.path.join(validate_gt_dir, "{}.png".format(image_name)), msk)
 
-
-        cal_f1_score(validate_gt_dir,validate_output_dir)
+        if args.dataset_type == 'celebA':
+            # cal_f1_score_celebA(validate_gt_dir,validate_output_dir) # temp comment
+            pass
+        else:
+            cal_f1_score(validate_gt_dir,validate_output_dir)
 
         plt.show()
-    else:
+    else: # EG1800
         # Create dataloaders
         _, val_loader, _ = create_loaders(args)
         try:

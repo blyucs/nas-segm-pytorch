@@ -17,15 +17,15 @@ dataset_dirs = {
             'VAL_DIR' : '../data/datasets/celebA/',
             #TRAIN_LIST = '../data/datasets/celebA/train_mini.lst'
             #VAL_LIST = '../data/datasets/celebA/train_mini.lst'  # meta learning
-            'TRAIN_LIST' : '../data/datasets/celebA/train.lst',
-            'VAL_LIST' : '../data/datasets/celebA/train.lst'  # meta learning
+            'TRAIN_LIST' : '../data/datasets/celebA/train_all_class.lst',
+            'VAL_LIST' : '../data/datasets/celebA/test_all_class.lst'  # meta learning
         },
     'EG1800':
         {
-            'TRAIN_DIR': '../data/datasets/portrait_seg/EG1800/',
-            'VAL_DIR': '../data/datasets/portrait_seg/EG1800/',
-            'TRAIN_LIST': '../data/datasets/portrait_seg/EG1800/train.lst',
-            'VAL_LIST': '../data/datasets/portrait_seg/EG1800/train.lst'  # meta learning
+            'TRAIN_DIR': '../data/datasets/EG1800/',
+            'VAL_DIR': '../data/datasets/EG1800/',
+            'TRAIN_LIST': '../data/datasets/EG1800/train.lst',
+            'VAL_LIST': '../data/datasets/EG1800/train.lst'  # meta learning
         },
     'celebA-binary':
         {
@@ -86,13 +86,17 @@ NORMALISE_PARAMS = [1./255, # SCALE
                     np.array([0.229, 0.224, 0.225]).reshape((1, 1, 3))] # STD
 BATCH_SIZE ={'celebA':[64, 128],'EG1800':[16,1],'celebA-binary':[64,16],'helen':[16,32],'celebA-face':[16,32], 'helen_nohair':[16,32]}
 NUM_WORKERS = 32
-TRAIN_EPOCH_NUM = {'celebA':[40,10],'EG1800':[0,20],'celebA-binary':[0,6],'helen':[0,200],'celebA-face':[0,10],'helen_nohair':[0,100]}
+TRAIN_EPOCH_NUM = {'celebA':[40,100],'EG1800':[0,20],'celebA-binary':[0,6],'helen':[0,200],'celebA-face':[0,10],'helen_nohair':[0,100]}
 
 NUM_CLASSES = {'face_seg':[11,11],'celebA':[19,19],'EG1800':[2,2],'celebA-binary':[2,2], 'helen':[11,11],'celebA-face':[11,11],'helen_nohair':[10,10]}
 LOW_SCALE = 0.7
 HIGH_SCALE = 1.4
-VAL_SHORTER_SIDE = 512
-VAL_CROP_SIZE = 512
+# VAL_SHORTER_SIDE = 512
+# VAL_CROP_SIZE = 512
+
+VAL_SHORTER_SIDE = 400  # EG1800
+VAL_CROP_SIZE = 400  #EG1800
+
 VAL_BATCH_SIZE = {'face_seg':64,'celebA':64, 'EG1800':4,'celebA-binary':16,'helen':1,'celebA-face':1, 'helen_nohair':1}
 
 # ENCODER PARAMETERS
@@ -118,8 +122,9 @@ SUMMARY_DIR = './tb_logs/'
 # LR_ENC = [4e-3, 4e-3]
 # LR_DEC = [1e-2, 1e-2]
 
-LR_ENC = [1e-4, 1e-4]# finetune
-LR_DEC = [3e-4, 3e-4]#finetune
+LR_ENC = [4e-4, 4e-4]# finetune
+LR_DEC = [3e-3, 3e-3]#finetune
+# LR_DEC = [3e-4, 3e-4]#finetune
 # LR_DEC = [1e-4, 1e-4]#finetune
 
 LR_CTRL = 1e-4

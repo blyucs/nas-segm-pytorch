@@ -40,7 +40,7 @@ from utils.default_args import *
 from utils.solvers import create_optimisers
 
 
-os.environ["CUDA_VISIBLE_DEVICES"]="1,2,3"
+os.environ["CUDA_VISIBLE_DEVICES"]="2,3"
 logging.basicConfig(level=logging.INFO)
 def get_arguments():
     """Parse all the arguments provided from the CLI.
@@ -50,7 +50,7 @@ def get_arguments():
     """
     parser = argparse.ArgumentParser(description="NAS Search")
 
-    parser.add_argument("--dataset_type", type=str, default='helen', #'celebA-face',#'EG1800',#'celebA-binary',
+    parser.add_argument("--dataset_type", type=str, default= 'celebA',#'helen', #'celebA-face',#'EG1800',#'celebA-binary',
                         help="dataset type to be trained or valued.")
 
     # Dataset
@@ -223,8 +223,10 @@ def main():
             # decoder_config = [[1, [0, 0, 6, 0], [0, 3, 8, 3], [3, 0, 6, 3]], [[1, 2], [2, 4], [0, 4]]] #0.7137 all cls
             # decoder_config = [[10, [1, 0, 8, 10], [0, 1, 3, 2], [7, 1, 4, 3]], [[3, 0], [3, 4], [3, 2]]] #0.095 worst all cls
             # [[10, [1, 1, 5, 2], [3, 0, 3, 4], [6, 7, 5, 9]], [[0, 0], [4, 3], [3, 1]]] #0.1293 all cls
+            # decoder_config =   [[1, [1, 1, 5, 5], [1, 0, 2, 7], [1, 4, 7, 5]], [[2, 1], [3, 0], [3, 2]]] # 0.7601  new select
+            decoder_config = [[3, [1, 1, 5, 0], [0, 4, 1, 9], [4, 3, 2, 0]], [[3, 3], [2, 1], [2, 0], [1,4]]]  #0.7564
             # decoder_config = [[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2]]] # 0.7816 reward
-            decoder_config = [[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2],[0,2],[1,4]]] # 0.7816 reward
+            # decoder_config = [[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2],[0,2],[1,4]]] # 0.7816 reward
             # decoder_config = [[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2],[0,2],[1,4],[0,3]]] # 0.7816 reward
             # decoder_config = [[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]] #0.9636 EG1800
             #decoder_config = [[1, [1, 0, 3, 9], [2, 3, 4, 9], [2, 1, 1, 1]], [[1, 3], [2, 0], [0, 3]]]  #0.9636 EG1800
@@ -257,10 +259,12 @@ def main():
     # finetune_ckpt_path = './ckpt/_train_helen_20200228T1957/segmenter_checkpoint_0.31.pth.tar'
     # finetune_ckpt_path = './ckpt/_train_helen_20200228T2101/segmenter_checkpoint_0.30.pth.tar'
     # finetune_ckpt_path = './ckpt/_train_helen_20200301T1545/segmenter_checkpoint_0.28.pth.tar'
-    finetune_ckpt_path = './ckpt/_train_helen_20200302T2201/segmenter_checkpoint_0.27.pth.tar'
+    # finetune_ckpt_path = './ckpt/_train_helen_20200302T2201/segmenter_checkpoint_0.27.pth.tar'
     # finetune_ckpt_path = './ckpt/_train_helen_nohair_20200303T1416/segmenter_checkpoint_0.19.pth.tar'
     # finetune_ckpt_path = './ckpt/_train_celebA-face_20200225T1518/segmenter_checkpoint_0.20.pth.tar'
     # finetune_ckpt_path = './ckpt/_train_celebA-face_20200225T1901/segmenter_checkpoint_0.14.pth.tar'
+    # finetune_ckpt_path = './ckpt/_train_celebA_20200304T2257/segmenter_checkpoint_0.22.pth.tar'
+    finetune_ckpt_path ='./ckpt/_train_celebA_20200305T1751/segmenter_checkpoint_0.25.pth.tar'
     segmenter.load_state_dict(torch.load(finetune_ckpt_path))
     logger.info(" Loaded Encoder with #TOTAL PARAMS={:3.2f}M"
                 .format(compute_params(segmenter)[0] / 1e6))

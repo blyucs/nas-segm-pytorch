@@ -69,8 +69,8 @@ SEGMENTER_CKPT_PATH = \
         # 'EG1800': './ckpt/_train_EG1800_20200218T1503/segmenter_checkpoint.pth.tar',
         # 'EG1800': './ckpt/_train_EG1800_20200218T1606/segmenter_checkpoint.pth.tar',
         # 'EG1800': './ckpt/_train_EG1800_20200218T1842/segmenter_checkpoint.pth.tar',
-        # 'EG1800': './ckpt/_train_EG1800_20200218T2034/segmenter_checkpoint.pth.tar', #0.967
-        'EG1800': './ckpt/_train_EG1800_20200218T2158/segmenter_checkpoint.pth.tar',  # 0.873
+        'EG1800': './ckpt/_train_EG1800_20200218T2034/segmenter_checkpoint.pth.tar', #0.967
+        # 'EG1800': './ckpt/_train_EG1800_20200218T2158/segmenter_checkpoint.pth.tar',  # 0.873
         # 'helen': './ckpt/_train_helen_20200223T1724/segmenter_checkpoint.pth.tar',  #
         # 'helen': './ckpt/_train_helen_20200224T1611/segmenter_checkpoint.pth.tar',  # 0.81
         # 'helen': './ckpt/_train_helen_20200225T1251/segmenter_checkpoint.pth.tar',  # 0.873
@@ -111,7 +111,7 @@ def get_arguments():
     """
     parser = argparse.ArgumentParser(description="NAS Search")
 
-    parser.add_argument("--dataset_type", type=str, default= 'helen',#'EG1800',#'celebA-binary',
+    parser.add_argument("--dataset_type", type=str, default= 'EG1800',#'celebA-binary',
                         help="dataset type to be trained or valued.")
 
     # Dataset

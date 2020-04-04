@@ -44,11 +44,11 @@ def create_loaders(args):
         # ValResizeShorterScale(args.val_shorter_side, 1, 1),
         Normalise(*args.normalise_params),
         ToTensor()])
-    composed_val = transforms.Compose([
-        # ResizeShorterScale(args.val_shorter_side, 1, 1),
-        # CentralCrop(args.val_crop_size),
-        ValResizeShorterScale(args.val_shorter_side, 1, 1),
-        # Normalise(*args.normalise_params),
+    composed_val = transforms.Compose([   # does not mean while training, but means in searching
+        ResizeShorterScale(args.val_shorter_side, 1, 1),  # no
+        CentralCrop(args.val_crop_size), # no
+        # ValResizeShorterScale(args.val_shorter_side, 1, 1), #yes
+        Normalise(*args.normalise_params),  #  no
         ToTensor()])
     ## Training and validation sets ##
     trainset = Dataset(data_file=dataset_dirs[args.dataset_type]['TRAIN_LIST'],
