@@ -224,13 +224,25 @@ def main():
             # decoder_config = [[10, [1, 0, 8, 10], [0, 1, 3, 2], [7, 1, 4, 3]], [[3, 0], [3, 4], [3, 2]]] #0.095 worst all cls
             # [[10, [1, 1, 5, 2], [3, 0, 3, 4], [6, 7, 5, 9]], [[0, 0], [4, 3], [3, 1]]] #0.1293 all cls
             # decoder_config =   [[1, [1, 1, 5, 5], [1, 0, 2, 7], [1, 4, 7, 5]], [[2, 1], [3, 0], [3, 2]]] # 0.7601  new select
-            decoder_config = [[3, [1, 1, 5, 0], [0, 4, 1, 9], [4, 3, 2, 0]], [[3, 3], [2, 1], [2, 0], [1,4]]]  #0.7564
+            # decoder_config = [[3, [1, 1, 5, 0], [0, 4, 1, 9], [4, 3, 2, 0]], [[3, 3], [2, 1], [2, 0], [1,4]]]  #0.7564
             # decoder_config = [[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2]]] # 0.7816 reward
             # decoder_config = [[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2],[0,2],[1,4]]] # 0.7816 reward
             # decoder_config = [[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2],[0,2],[1,4],[0,3]]] # 0.7816 reward
             # decoder_config = [[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]] #0.9636 EG1800
             #decoder_config = [[1, [1, 0, 3, 9], [2, 3, 4, 9], [2, 1, 1, 1]], [[1, 3], [2, 0], [0, 3]]]  #0.9636 EG1800
             #decoder_config = [[2, [1, 0, 10, 8], [2, 3, 1, 8], [2, 1, 2, 2]], [[3, 1], [2, 4], [5, 5]]]
+            # decoder_config = [[8, [0, 0, 1, 7], [2, 3, 5, 4], [7, 7, 7, 0]], [[2, 0], [4, 0], [3, 5]]] #error indices can not be trained
+            # decoder_config = [[1, [1, 1, 0, 4], [4, 1, 7, 9], [6, 6, 9, 10]], [[2, 1], [1, 1], [0, 3]]] #error indices can not be trained
+            # tobetrained_arch  proove
+            # decoder_config = [[2, [1, 0, 7, 7], [1, 2, 3, 2], [7, 7, 8, 8]], [[1, 0], [0, 2], [2, 5]]] #error indices can not be trained
+            # decoder_config = [[4, [1, 1, 2, 8], [3, 3, 3, 9], [1, 5, 6, 8]], [[2, 2], [2, 3], [3, 0]]] #0.1444 Mean IoU: 0.068 Mean FW-IoU: 0.289      Mean Acc: 0.104 Reward: 0.127
+            # decoder_config = [[3, [1, 1, 4, 2], [0, 2, 2, 1], [4, 4, 0, 8]], [[1, 3], [2, 0], [3, 3]]] #0.1630 Mean IoU: 0.627 Mean FW-IoU: 0.850      Mean Acc: 0.732 Reward: 0.731#
+            # decoder_config = [[3, [1, 1, 6, 1], [0, 2, 2, 9], [3, 0, 3, 9]], [[1, 1], [1, 2], [2, 2]]] #0.2595 Mean IoU: 0.545 Mean FW-IoU: 0.813      Mean Acc: 0.647 Reward: 0.659
+            # decoder_config = [[4, [0, 0, 7, 9], [0, 2, 5, 1], [4, 6, 0, 7]], [[1, 1], [1, 1], [5, 3]]] # 0.2978 Mean IoU: 0.553 Mean FW-IoU: 0.818      Mean Acc: 0.664 Reward: 0.670#
+            # decoder_config = [[1, [0, 1, 3, 8], [0, 3, 6, 10], [2, 0, 0, 9]], [[1, 3], [3, 1], [3, 1]]] # 0.2520  Mean IoU: 0.547 Mean FW-IoU: 0.813      Mean Acc: 0.652 Reward: 0.662
+            # decoder_config = [[9, [1, 0, 1, 1], [3, 3, 0, 0], [7, 6, 4, 2]], [[3, 3], [3, 4], [5, 5]]] # 0.3777 Mean IoU: 0.324 Mean FW-IoU: 0.704      Mean Acc: 0.389 Reward: 0.446
+            # decoder_config = [[7, [1, 0, 5, 4], [3, 3, 8, 9], [4, 1, 0, 2]], [[3, 2], [3, 2], [3, 1]]] # 0.3561 Mean IoU: 0.546 Mean FW-IoU: 0.818      Mean Acc: 0.645 Reward: 0.660
+            decoder_config = [[1, [0, 0, 5, 1], [3, 2, 1, 10], [3, 5, 10, 9]], [[2, 3], [1, 2], [2, 2]]] #0.7613  Mean IoU: 0.544 Mean FW-IoU: 0.816      Mean Acc: 0.650 Reward: 0.661
             decoder = Decoder(inp_sizes=encoder.out_sizes,
                                           num_classes=NUM_CLASSES[args.dataset_type][0],
                                           config=decoder_config,
@@ -264,8 +276,8 @@ def main():
     # finetune_ckpt_path = './ckpt/_train_celebA-face_20200225T1518/segmenter_checkpoint_0.20.pth.tar'
     # finetune_ckpt_path = './ckpt/_train_celebA-face_20200225T1901/segmenter_checkpoint_0.14.pth.tar'
     # finetune_ckpt_path = './ckpt/_train_celebA_20200304T2257/segmenter_checkpoint_0.22.pth.tar'
-    finetune_ckpt_path ='./ckpt/_train_celebA_20200305T1751/segmenter_checkpoint_0.25.pth.tar'
-    segmenter.load_state_dict(torch.load(finetune_ckpt_path))
+    # finetune_ckpt_path ='./ckpt/_train_celebA_20200305T1751/segmenter_checkpoint_0.25.pth.tar'
+    # segmenter.load_state_dict(torch.load(finetune_ckpt_path))
     logger.info(" Loaded Encoder with #TOTAL PARAMS={:3.2f}M"
                 .format(compute_params(segmenter)[0] / 1e6))
 
@@ -379,8 +391,8 @@ def main():
             # apply_polyak(args.do_polyak,
             #              segmenter.module.decoder if task_idx == 0 else segmenter,
             #              avg_param)
-            #if (epoch_segm + 1) % (args.val_every[task_idx]) == 0:
-            if False:
+            if (epoch_segm + 1) % (args.val_every[task_idx]) == 0:
+            # if True:
                 logger.info(
                     " Validating Segmenter, Epoch {}, Task {}"
                         .format(str(9876), str(task_idx)))

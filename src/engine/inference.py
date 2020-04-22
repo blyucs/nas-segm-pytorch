@@ -117,4 +117,4 @@ def validate(segmenter, val_loader, epoch, epoch2, num_classes=-1, print_every=1
     #         ax[i*2+1].imshow(gt_cmap)
     #         ax[i*2+1].set_title("gt image")
 
-    return reward
+    return miou #reward #, miou

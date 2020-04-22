@@ -39,7 +39,7 @@ from utils.default_args import *
 from utils.solvers import create_optimisers
 
 
-os.environ["CUDA_VISIBLE_DEVICES"]="3"
+os.environ["CUDA_VISIBLE_DEVICES"]="2,3"
 logging.basicConfig(level=logging.INFO)
 
 
@@ -113,8 +113,8 @@ def get_arguments():
                         help='Seed to provide (near-)reproducibility.')
     parser.add_argument("--snapshot-dir", type=str, default=SNAPSHOT_DIR,
                         help="Path to directory for storing checkpoints.")
-    # parser.add_argument("--ckpt-path", type=str, default=CKPT_PATH,
-    #                     help="Path to the checkpoint file.")
+    parser.add_argument("--ckpt-path", type=str, default=CKPT_PATH,
+                        help="Path to the checkpoint file.")
     parser.add_argument("--val-every", nargs='+', type=int, default=VAL_EVERY,
                         help="How often to validate current architecture.")
     parser.add_argument("--summary-dir", type=str, default=SUMMARY_DIR,
@@ -305,6 +305,8 @@ def main():
         logger.info(" Training Segmenter, Epoch {}".format(str(epoch)))
         stop = False
         for task_idx in range(args.num_tasks):#0,1
+            if task_idx == 0: # do not use task 0
+                continue
             if stop:
                 break
             torch.cuda.empty_cache()
@@ -382,14 +384,15 @@ def main():
                                          num_classes=NUM_CLASSES[args.dataset_type][task_idx],
                                          print_every=args.print_every)
                     # Verifying if we are continuing training this architecture.
-                    c_task_ps = task_ps[task_idx][(epoch_segm + 1) // args.val_every[task_idx] - 1]
-                    if c_task_ps.step(task_miou):
-                        continue
-                    else:
-                        logger.info(" Interrupting")
-                        stop = True
-                        break
-            reward = task_miou  # will be used in train_agent process
+                    # c_task_ps = task_ps[task_idx][(epoch_segm + 1) // args.val_every[task_idx] - 1]
+                    # if c_task_ps.step(task_miou):
+                    #     continue
+                    # else:
+                    #     logger.info(" Interrupting")
+                    #     stop = True
+                    #     break
+            reward = task_miou + 0.1  # will be used in train_agent process
+            # reward = MIOU  # will be used in train_agent process
         #do_search = False
         if do_search:
             logger.info(" Training Controller")

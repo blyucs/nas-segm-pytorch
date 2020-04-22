@@ -84,7 +84,7 @@ def cal_f1_score(gt_dir,pred_dir):
         print(f'f1_{eval_name}={f1}')
 
 gt_celebA_label_names = pred_celebA_label_names = ['bg','skin', 'nose', 'eye_g', 'l_eye', 'r_eye', 'l_brow', 'r_brow', 'l_ear', 'r_ear', 'mouth', 'u_lip', 'l_lip', 'hair', 'hat', 'ear_r', 'neck_l', 'neck', 'cloth']
-def cal_f1_score_celebA(gt_dir,pred_dir):
+def cal_f1_score_celebA(gt_dir,pred_dir,arch_writer=None):
 
     assert gt_celebA_label_names[0] == pred_celebA_label_names[0] == 'bg'
 
@@ -135,3 +135,7 @@ def cal_f1_score_celebA(gt_dir,pred_dir):
         intersected = hist_sum[gt_inds, :][:, pred_inds].sum()
         f1 = 2 * intersected / (A + B)
         print(f'f1_{eval_name}={f1}')
+        if arch_writer != None:
+            arch_writer.write(f'f1_{eval_name}=\t{f1}\n')
+    if arch_writer != None:
+        arch_writer.flush()
