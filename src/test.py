@@ -59,9 +59,25 @@ SEGMENTER_CKPT_PATH = \
         # 'celebA':'./ckpt/_train_celebA_20200305T1653/segmenter_checkpoint_0.24.pth.tar',  # 19 classes
         # 'celebA':'./ckpt/_train_celebA_20200305T1751/segmenter_checkpoint_0.25.pth.tar',  # 19 classes 0.943 best?
         # 'celebA':'./ckpt/_train_celebA_20200305T2113/segmenter_checkpoint_0.22.pth.tar',  # 19 classes 0.945 best?
-        'celebA':'./ckpt/_train_celebA_20200412T1303/segmenter_checkpoint_0.22.pth.tar',  # 19 classes
+        # 'celebA':'./ckpt/_train_celebA_20200412T1303/segmenter_checkpoint_0.22.pth.tar',  # 19 classes
         # 'celebA':'./ckpt/_train_celebA_20200415T1358/segmenter_checkpoint_0.29.pth.tar',  # 19 classes
         # 'celebA':'./ckpt/_train_celebA_20200415T1314/segmenter_checkpoint_0.43.pth.tar',  # 19 classes
+        #transpose2d
+        # 'celebA':'./ckpt/_train_celebA_20200508T1421/segmenter_checkpoint_0.35.pth.tar',  # 19 classes
+        # 'celebA':'./ckpt/_train_celebA_20200508T1457/segmenter_checkpoint_0.53.pth.tar',  # 19 classes
+        # 'celebA':'./ckpt/_train_celebA_20200508T1633/segmenter_checkpoint_0.29.pth.tar',  # 19 classes
+        # 'celebA':'./ckpt/_train_celebA_20200508T1818/segmenter_checkpoint_0.20.pth.tar',  # 19 classes
+        'celebA':'./ckpt/_train_celebA_20200508T2003/segmenter_checkpoint_0.21.pth.tar',  # 19 classes
+        # 'celebA':'./ckpt/_train_celebA_20200510T0933/segmenter_checkpoint_0.20.pth.tar',  # 19 classes
+        # 'celebA':'./ckpt/_train_celebA_20200520T1632/segmenter_checkpoint_0.13.pth.tar',  # 19 classes
+        # 'celebA':'./ckpt/_train_celebA_20200521T2255/segmenter_checkpoint_0.28.pth.tar',  # 19 classes
+        # 'celebA':'./ckpt/_train_celebA_20200522T1121/segmenter_checkpoint_0.25.pth.tar',  # 19 classes
+        # 'celebA':'./ckpt/_train_celebA_20200522T1617/segmenter_checkpoint_0.19.pth.tar',  # 19 classes
+        # 'celebA':'./ckpt/_train_celebA_20200522T1922/segmenter_checkpoint_0.34.pth.tar',  # 19 classes ghostnet
+        # 'celebA':'./ckpt/_train_celebA_20200522T2218/segmenter_checkpoint_0.24.pth.tar',  # 19 classes ghostnet
+        # 'celebA':'./ckpt/_train_celebA_20200523T1135/segmenter_checkpoint_0.27.pth.tar',  # 19 classes ghostnet
+        # 'celebA':'./ckpt/_train_celebA_20200523T1444/segmenter_checkpoint_0.27.pth.tar',  # 19 classes ghostnet
+        # 'celebA':'./ckpt/_train_celebA_20200523T1748/segmenter_checkpoint_0.26.pth.tar',  # 19 classes ghostnet
         #'EG1800':'./ckpt/train20200117T1958/segmenter_checkpoint.pth.tar'
         #'EG1800':'./ckpt/train20200118T1128/segmenter_checkpoint.pth.tar' , # 00079,00094,good, the best model currently
         #'EG1800': './ckpt/_train_EG1800_20200217T1059/segmenter_checkpoint.pth.tar',
@@ -439,7 +455,7 @@ def main():
         flops, params = clever_format([flops, params], "%.3f")
         print(flops)
         print(params)
-        segm = cv2.resize(segm, orig_size, interpolation=cv2.INTER_CUBIC) #375*500*21
+        # segm = cv2.resize(segm, orig_size, interpolation=cv2.INTER_CUBIC) #375*500*21
         segm = segm.argmax(axis=2).astype(np.uint8)
         if args.dataset_type =='EG1800'  and show_raw_portrait_seg:
             img_segm = img.copy()

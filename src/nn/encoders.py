@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 
 from .layer_factory import InvertedResidual, conv_bn_relu6
-
+from .ghost_net import ghost_net
 
 __all__ = ['mbv2']
 
@@ -75,3 +75,5 @@ def create_encoder(pretrained='voc'):
 # def create_encoder(pretrained=''):
     """Create Encoder"""
     return mbv2(pretrained=pretrained)
+    # ghostnet = ghost_net()
+    # return ghostnet

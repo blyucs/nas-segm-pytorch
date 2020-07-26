@@ -36,17 +36,17 @@ def create_loaders(args):
     ## Transformations during training ##
     logger = logging.getLogger(__name__)
     composed_trn = transforms.Compose([
-        ResizeShorterScale(args.shorter_side[0], args.low_scale, args.high_scale), # resize must be use with crop to make the image square
+        # ResizeShorterScale(args.shorter_side[0], args.low_scale, args.high_scale), # resize must be use with crop to make the image square
         # RandomMirror(),  #comment for left and right property
         # RandomRotate(),
-        RandomCrop(args.crop_size[0]),
+        # RandomCrop(args.crop_size[0]),
 	    # RandomRotate(),
         # ValResizeShorterScale(args.val_shorter_side, 1, 1),
         Normalise(*args.normalise_params),
         ToTensor()])
     composed_val = transforms.Compose([   # does not mean while training, but means in searching
-        ResizeShorterScale(args.val_shorter_side, 1, 1),  # no
-        CentralCrop(args.val_crop_size), # no
+        # ResizeShorterScale(args.val_shorter_side, 1, 1),  # no
+        # CentralCrop(args.val_crop_size), # no
         # ValResizeShorterScale(args.val_shorter_side, 1, 1), #yes
         Normalise(*args.normalise_params),  #  no
         ToTensor()])

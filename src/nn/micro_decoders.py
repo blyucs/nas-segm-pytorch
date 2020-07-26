@@ -198,6 +198,7 @@ class MicroDecoder(nn.Module):
         self.conv_clf = conv3x3(agg_size, num_classes, stride=1, bias=True)
         self.info = ' + '.join(self.pool[i] for i in self.collect_inds)
         self.num_classes = num_classes
+        # self.upsample_x = nn.ConvTranspose2d(48, 48, 3, 1, 0, bias=False)
 
     def prettify(self, n_params):
         """ Encoder config: None
@@ -219,18 +220,33 @@ class MicroDecoder(nn.Module):
             cell_out = cell(x[conn[0]], x[conn[1]])
             x.append(cell_out)
             aux_outs.append(aux_clf(cell_out.clone()))
-        out = x[self.collect_inds[0]]
-        for i in range(1, len(self.collect_inds)):
-            collect = x[self.collect_inds[i]]
-            if out.size()[2] > collect.size()[2]:
-                # upsample collect
-                collect = nn.Upsample(
-                    size=out.size()[2:], mode='bilinear', align_corners=False)(collect)
-            elif collect.size()[2] > out.size()[2]:
-                out = nn.Upsample(
-                    size=collect.size()[2:], mode='bilinear', align_corners=False)(out)
-            out = torch.cat([out, collect], 1)
-
+        # print(aux_outs)
+        if 0:
+            out = x[self.collect_inds[0]]
+            for i in range(1, len(self.collect_inds)):
+                collect = x[self.collect_inds[i]]
+                if out.size()[2] > collect.size()[2]:
+                    # upsample collect
+                    collect = nn.Upsample(
+                        size=out.size()[2:], mode='bilinear', align_corners=False)(collect)
+                elif collect.size()[2] > out.size()[2]:
+                    out = nn.Upsample(
+                        size=collect.size()[2:], mode='bilinear', align_corners=False)(out)
+                out = torch.cat([out, collect], 1)
+        else:
+            out = []
+            for i in range(len(self.collect_inds)):
+                collect = x[self.collect_inds[i]]
+                # upsample_x = nn.ConvTranspose2d(collect.size()[1], collect.size()[1], 4, (int)(512/collect.size()[2]),padding=1
+                #                                 ,output_padding=(int)(512/collect.size()[2]) -2, bias=False).cuda()
+                # # upsample_x.weight.data = bilinear_kernel(self.collect_inds[i](1), self.collect_inds[i](1), 4)
+                # collect_out = upsample_x(collect)
+                collect_out = nn.Upsample(
+                    size=(512, 512), mode='bilinear', align_corners=False)(collect)
+                if i == 0:
+                    out = collect_out
+                else:
+                    out = torch.cat([out, collect_out], 1)
         out = F.relu(out)
         out = self.pre_clf(out)
         out = self.conv_clf(out)

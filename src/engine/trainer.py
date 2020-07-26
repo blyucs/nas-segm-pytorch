@@ -10,6 +10,8 @@ from torch import nn
 
 from helpers.utils import AverageMeter, ctime, try_except
 
+from focal_loss import focal_loss_zhihu,focal_loss_my
+
 logger = logging.getLogger(__name__)
 
 
@@ -223,6 +225,8 @@ def train_segmenter(
         soft_output = nn.LogSoftmax()(output)
         # Compute loss and backpropagate
         loss = segm_crit(soft_output, target_var)
+        # loss = focal_loss_zhihu(output,target_var)
+        # loss = focal_loss_my(output,target_var)
         # Compute auxiliary loss
         if aux_weight > 0:
             for aux_out in aux_outs:

@@ -40,7 +40,8 @@ from utils.default_args import *
 from utils.solvers import create_optimisers
 
 
-os.environ["CUDA_VISIBLE_DEVICES"]="2,3"
+os.environ["CUDA_VISIBLE_DEVICES"]="1,2,3"
+# os.environ["CUDA_VISIBLE_DEVICES"]="3"
 logging.basicConfig(level=logging.INFO)
 def get_arguments():
     """Parse all the arguments provided from the CLI.
@@ -48,6 +49,7 @@ def get_arguments():
     Returns:
       A list of parsed arguments.
     """
+
     parser = argparse.ArgumentParser(description="NAS Search")
 
     parser.add_argument("--dataset_type", type=str, default= 'celebA',#'helen', #'celebA-face',#'EG1800',#'celebA-binary',
@@ -224,7 +226,7 @@ def main():
             # decoder_config = [[10, [1, 0, 8, 10], [0, 1, 3, 2], [7, 1, 4, 3]], [[3, 0], [3, 4], [3, 2]]] #0.095 worst all cls
             # [[10, [1, 1, 5, 2], [3, 0, 3, 4], [6, 7, 5, 9]], [[0, 0], [4, 3], [3, 1]]] #0.1293 all cls
             # decoder_config =   [[1, [1, 1, 5, 5], [1, 0, 2, 7], [1, 4, 7, 5]], [[2, 1], [3, 0], [3, 2]]] # 0.7601  new select
-            # decoder_config = [[3, [1, 1, 5, 0], [0, 4, 1, 9], [4, 3, 2, 0]], [[3, 3], [2, 1], [2, 0], [1,4]]]  #0.7564
+            decoder_config = [[3, [1, 1, 5, 0], [0, 4, 1, 9], [4, 3, 2, 0]], [[3, 3], [2, 1], [2, 0], [1,4]]]  #0.7564
             # decoder_config = [[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2]]] # 0.7816 reward
             # decoder_config = [[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2],[0,2],[1,4]]] # 0.7816 reward
             # decoder_config = [[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2],[0,2],[1,4],[0,3]]] # 0.7816 reward
@@ -242,7 +244,7 @@ def main():
             # decoder_config = [[1, [0, 1, 3, 8], [0, 3, 6, 10], [2, 0, 0, 9]], [[1, 3], [3, 1], [3, 1]]] # 0.2520  Mean IoU: 0.547 Mean FW-IoU: 0.813      Mean Acc: 0.652 Reward: 0.662
             # decoder_config = [[9, [1, 0, 1, 1], [3, 3, 0, 0], [7, 6, 4, 2]], [[3, 3], [3, 4], [5, 5]]] # 0.3777 Mean IoU: 0.324 Mean FW-IoU: 0.704      Mean Acc: 0.389 Reward: 0.446
             # decoder_config = [[7, [1, 0, 5, 4], [3, 3, 8, 9], [4, 1, 0, 2]], [[3, 2], [3, 2], [3, 1]]] # 0.3561 Mean IoU: 0.546 Mean FW-IoU: 0.818      Mean Acc: 0.645 Reward: 0.660
-            decoder_config = [[1, [0, 0, 5, 1], [3, 2, 1, 10], [3, 5, 10, 9]], [[2, 3], [1, 2], [2, 2]]] #0.7613  Mean IoU: 0.544 Mean FW-IoU: 0.816      Mean Acc: 0.650 Reward: 0.661
+            # decoder_config = [[1, [0, 0, 5, 1], [3, 2, 1, 10], [3, 5, 10, 9]], [[2, 3], [1, 2], [2, 2]]] #0.7613  Mean IoU: 0.544 Mean FW-IoU: 0.816      Mean Acc: 0.650 Reward: 0.661
             decoder = Decoder(inp_sizes=encoder.out_sizes,
                                           num_classes=NUM_CLASSES[args.dataset_type][0],
                                           config=decoder_config,
@@ -276,12 +278,12 @@ def main():
     # finetune_ckpt_path = './ckpt/_train_celebA-face_20200225T1518/segmenter_checkpoint_0.20.pth.tar'
     # finetune_ckpt_path = './ckpt/_train_celebA-face_20200225T1901/segmenter_checkpoint_0.14.pth.tar'
     # finetune_ckpt_path = './ckpt/_train_celebA_20200304T2257/segmenter_checkpoint_0.22.pth.tar'
-    # finetune_ckpt_path ='./ckpt/_train_celebA_20200305T1751/segmenter_checkpoint_0.25.pth.tar'
-    # segmenter.load_state_dict(torch.load(finetune_ckpt_path))
+    finetune_ckpt_path ='./ckpt/_train_celebA_20200523T1135/segmenter_checkpoint_0.27.pth.tar'
+    segmenter.load_state_dict(torch.load(finetune_ckpt_path))
     logger.info(" Loaded Encoder with #TOTAL PARAMS={:3.2f}M"
                 .format(compute_params(segmenter)[0] / 1e6))
 
-    # Create dataloaders
+    # Create dataloader
     train_loader, val_loader, do_search = create_loaders(args)
 
     # Initialise task performance measurers
@@ -391,29 +393,29 @@ def main():
             # apply_polyak(args.do_polyak,
             #              segmenter.module.decoder if task_idx == 0 else segmenter,
             #              avg_param)
-            if (epoch_segm + 1) % (args.val_every[task_idx]) == 0:
-            # if True:
-                logger.info(
-                    " Validating Segmenter, Epoch {}, Task {}"
-                        .format(str(9876), str(task_idx)))
-                task_miou = validate(segmenter,
-                                     val_loader,
-                                     9876,
-                                     epoch_segm, #[5,1]
-                                     num_classes=NUM_CLASSES[args.dataset_type][task_idx],
-                                     print_every=args.print_every)
-                # Verifying if we are continuing training this architecture.
-                c_task_ps = task_ps[task_idx][(epoch_segm + 1) // args.val_every[task_idx] - 1]
-                if c_task_ps.step(task_miou):
-                    continue
-                else:
-                    logger.info(" Interrupting")
-                    stop = True
-                    break
-                #reward = task_miou  # will be used in train_agent process
+            # if (epoch_segm + 1) % (args.val_every[task_idx]) == 0:
+            # # if True:
+            #     logger.info(
+            #         " Validating Segmenter, Epoch {}, Task {}"
+            #             .format(str(9876), str(task_idx)))
+            #     task_miou = validate(segmenter,
+            #                          val_loader,
+            #                          9876,
+            #                          epoch_segm, #[5,1]
+            #                          num_classes=NUM_CLASSES[args.dataset_type][task_idx],
+            #                          print_every=args.print_every)
+            #     # Verifying if we are continuing training this architecture.
+            #     c_task_ps = task_ps[task_idx][(epoch_segm + 1) // args.val_every[task_idx] - 1]
+            #     if c_task_ps.step(task_miou):
+            #         continue
+            #     else:
+            #         logger.info(" Interrupting")
+            #         # stop = True
+            #         # break
+            #     #reward = task_miou  # will be used in train_agent process
             # save the segmenter params with the best value
             # seg_saver.save(final_loss, segmenter.state_dict(), logger) #stub to 1
-    seg_saver.save(final_loss, segmenter.state_dict(), logger) #stub to 1
+    seg_saver.save(final_loss, {'segmenter':segmenter.state_dict(),'encoder':segmenter.module.encoder.state_dict()}, logger) #stub to 1
 
 
 if __name__ == '__main__':
