@@ -287,7 +287,7 @@ def main():
     del encoder
 
     color_array = np.array(color_list)
-    segmenter.load_state_dict(torch.load(args.ckpt_path[args.dataset_type]))
+    segmenter.load_state_dict(torch.load(args.ckpt_path[args.dataset_type]), strict=False)
     logger.info(" Loaded Encoder with #TOTAL PARAMS={:3.2f}M"
                 .format(compute_params(segmenter)[0] / 1e6))
 

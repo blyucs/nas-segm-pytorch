@@ -83,33 +83,34 @@ dataset_dirs = {
 
 
 # META_TRAIN_PRCT = 95  # search
-META_TRAIN_PRCT = 100 #train for 100
+# META_TRAIN_PRCT = 100 #train for 100
+META_TRAIN_PRCT = 83 #test for EG1800
 N_TASK0 = {'face_seg':1000,'celebA':1000,'EG1800':1000,'celebA-binary':1000,'helen':1000, 'helen_nohair':1000}
 # SHORTER_SIDE = [512, 400] # celebA train
-# SHORTER_SIDE = [300, 400] # HELEN train
-SHORTER_SIDE = [400, 400] # HELEN train
-# CROP_SIZE = [256, 350]
+SHORTER_SIDE = [300, 400] # HELEN train
+# SHORTER_SIDE = [400, 400] # HELEN train
+CROP_SIZE = [256, 350]
 # CROP_SIZE = [512, 350]  # celebA  train
 # CROP_SIZE = [256, 350]  # HELEN  train
-CROP_SIZE = [350, 350]  # HELEN  train
+# CROP_SIZE = [350, 350]  # HELEN  train
 NORMALISE_PARAMS = [1./255, # SCALE
                     np.array([0.485, 0.456, 0.406]).reshape((1, 1, 3)), # MEAN
                     np.array([0.229, 0.224, 0.225]).reshape((1, 1, 3))] # STD
-BATCH_SIZE ={'celebA':[16, 8],'EG1800':[16,1],'celebA-binary':[64,16],'helen':[16,32],'celebA-face':[16,32], 'helen_nohair':[16,32]}
+BATCH_SIZE ={'celebA':[16, 8],'EG1800':[16,32],'celebA-binary':[64,16],'helen':[16,32],'celebA-face':[16,32], 'helen_nohair':[16,32]}
 # BATCH_SIZE ={'celebA':[16, 8],'EG1800':[16,1],'celebA-binary':[64,16],'helen':[16,32],'celebA-face':[16,32], 'helen_nohair':[16,32]}
 # BATCH_SIZE ={'celebA':[16, 64],'EG1800':[16,1],'celebA-binary':[64,16],'helen':[16,32],'celebA-face':[16,32], 'helen_nohair':[16,32]}
 # BATCH_SIZE ={'celebA':[16, 1],'EG1800':[16,1],'celebA-binary':[64,16],'helen':[16,32],'celebA-face':[16,32], 'helen_nohair':[16,32]}
 NUM_WORKERS = 16
-TRAIN_EPOCH_NUM = {'celebA':[0,30],'EG1800':[0,20],'celebA-binary':[0,6],'helen':[0,200],'celebA-face':[0,10],'helen_nohair':[0,100]}
+TRAIN_EPOCH_NUM = {'celebA':[0,30],'EG1800':[0,300],'celebA-binary':[0,6],'helen':[0,200],'celebA-face':[0,10],'helen_nohair':[0,100]}
 
 NUM_CLASSES = {'face_seg':[11,11],'celebA':[19,19],'EG1800':[2,2],'celebA-binary':[2,2], 'helen':[11,11],'celebA-face':[11,11],'helen_nohair':[10,10]}
 LOW_SCALE = 0.7
 HIGH_SCALE = 1.4
-VAL_SHORTER_SIDE = 512
-VAL_CROP_SIZE = 512
+# VAL_SHORTER_SIDE = 512
+# VAL_CROP_SIZE = 512
 
-# VAL_SHORTER_SIDE = 400  # EG1800
-# VAL_CROP_SIZE = 400  #EG1800
+VAL_SHORTER_SIDE = 400  # EG1800
+VAL_CROP_SIZE = 400  #EG1800
 
 VAL_BATCH_SIZE = {'face_seg':64,'celebA':64, 'EG1800':4,'celebA-binary':16,'helen':1,'celebA-face':1, 'helen_nohair':1}
 

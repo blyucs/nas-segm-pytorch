@@ -52,7 +52,7 @@ def get_arguments():
 
     parser = argparse.ArgumentParser(description="NAS Search")
 
-    parser.add_argument("--dataset_type", type=str, default= 'helen',#'celebA',#, #'celebA-face',#'EG1800',#'celebA-binary',
+    parser.add_argument("--dataset_type", type=str, default='EG1800', #'helen',#'celebA',#, #'celebA-face',#,#'celebA-binary',
                         help="dataset type to be trained or valued.")
 
     # Dataset
@@ -229,12 +229,12 @@ def main():
             # decoder_config = [[3, [1, 1, 5, 0], [0, 4, 1, 9], [4, 3, 2, 0]], [[3, 3], [2, 1], [2, 0], [1,4]]]  #0.7564
             # decoder_config = [[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2]]] # 0.7816 reward
             # decoder_config = [[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2],[0,2],[1,4]]] # HELEN-L
-            decoder_config = [[7, [1, 0, 4, 9], [4, 4, 3, 2], [3, 1, 7, 3]], [[1, 0], [2, 1], [1, 2]]] # HELEN-M
+            # decoder_config = [[7, [1, 0, 4, 9], [4, 4, 3, 2], [3, 1, 7, 3]], [[1, 0], [2, 1], [1, 2]]] # HELEN-M
             # decoder_config = [[10, [1, 1, 3, 7], [4, 0, 2, 2], [2, 0, 0, 10]], [[0, 2], [2, 3], [4, 0]]]# HELEN-M
             # decoder_config = [[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2],[0,2],[1,4],[0,3]]] # 0.7816 reward
-            # decoder_config = [[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]] #0.9636 EG1800
-            #decoder_config = [[1, [1, 0, 3, 9], [2, 3, 4, 9], [2, 1, 1, 1]], [[1, 3], [2, 0], [0, 3]]]  #0.9636 EG1800
-            #decoder_config = [[2, [1, 0, 10, 8], [2, 3, 1, 8], [2, 1, 2, 2]], [[3, 1], [2, 4], [5, 5]]]
+            # decoder_config = [[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]] #0.9636  EG1800-L
+            decoder_config = [[1, [1, 0, 3, 9], [2, 3, 4, 9], [2, 1, 1, 1]], [[1, 3], [2, 0], [0, 3]]]  #0.9636 EG1800-M
+            # decoder_config = [[2, [1, 0, 10, 8], [2, 3, 1, 8], [2, 1, 2, 2]], [[3, 1], [2, 4], [5, 0]]] #EG1800-M] MIOU-97.9
             # decoder_config = [[8, [0, 0, 1, 7], [2, 3, 5, 4], [7, 7, 7, 0]], [[2, 0], [4, 0], [3, 5]]] #error indices can not be trained
             # decoder_config = [[1, [1, 1, 0, 4], [4, 1, 7, 9], [6, 6, 9, 10]], [[2, 1], [1, 1], [0, 3]]] #error indices can not be trained
             # tobetrained_arch  proove
