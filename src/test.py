@@ -131,9 +131,10 @@ SEGMENTER_CKPT_PATH = \
         # 'helen': './ckpt/_train_helen_20200303T2336/segmenter_checkpoint_0.25.pth.tar',  #
         # 'helen': './ckpt/_train_helen_20201111T1038/segmenter_checkpoint_0.16.pth.tar',  #
         # 'helen': './ckpt/_train_helen_20201111T1316/segmenter_checkpoint_0.20.pth.tar',  #
-        # 'helen': './ckpt/_train_helen_20201111T1520/segmenter_checkpoint_0.16.pth.tar',  #
-        # 'helen': './ckpt/_train_helen_20201111T1731/segmenter_checkpoint_0.17.pth.tar',  #
-        'helen': './ckpt/_train_helen_20201111T2057/segmenter_checkpoint_0.22.pth.tar',  #
+        # 'helen': './ckpt/_train_helen_20201111T1520/segmenter_checkpoint_0.15.pth.tar',  #
+        'helen': './ckpt/_train_helen_20201111T1731/segmenter_checkpoint_0.17.pth.tar',  #
+        # 'helen': './ckpt/_train_helen_20201111T2057/segmenter_checkpoint_0.22.pth.tar',  #
+	    # 'helen': './ckpt/_train_helen_20201112T0954/segmenter_checkpoint_0.15.pth.tar',  #
         # 'helen_nohair': './ckpt/_train_helen_nohair_20200303T1416/segmenter_checkpoint_0.19.pth.tar',  #
         'helen_nohair': './ckpt/_train_helen_nohair_20200303T1646/segmenter_checkpoint_0.14.pth.tar',  #
         # 'celebA-face': './ckpt/_train_celebA-face_20200225T1518/segmenter_checkpoint_0.20.pth.tar',
@@ -162,8 +163,8 @@ decoder_config = \
         'celebA-binary':[[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]], #0.9636 EG1800:
         # 'helen':[[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2]]],
         # 'helen':[[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2],[0,2],[1,4]]], #cur the best
-        # 'helen':[[7, [1, 0, 4, 9], [4, 4, 3, 2], [3, 1, 7, 3]], [[1, 0], [2, 1], [1, 2]]], #M
-        'helen':[[10, [1, 1, 3, 7], [4, 0, 2, 2], [2, 0, 0, 10]], [[0, 2], [2, 3], [4, 0]]], #S
+        'helen':[[7, [1, 0, 4, 9], [4, 4, 3, 2], [3, 1, 7, 3]], [[1, 0], [2, 1], [1, 2]]], #M
+        # 'helen':[[10, [1, 1, 3, 7], [4, 0, 2, 2], [2, 0, 0, 10]], [[0, 2], [2, 3], [4, 0]]], #S
         'helen_nohair':[[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2],[0,2],[1,4]]], #cur the best
         # 'helen':[[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2],[0,2],[1,4],[0,3]]], #0.89
         # 'helen':[[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2],[0,2],[1,4],[1,5]]], #0.89
