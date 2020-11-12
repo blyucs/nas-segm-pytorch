@@ -26,7 +26,7 @@ for fpathe,dirs,files in os.walk(os.path.join(data_path,'test_resize')):
 			val_image_id_list.write('test_resize/'+file.replace('image.jpg','label.png')+'\t')
 			val_image_id_list.write('test_resize/' + file.replace('image.jpg', 'label.png') + '\n')
 
-for fpathe,dirs,files in os.walk(os.path.join(data_path,'test_resize_single')):
+for fpathe,dirs,files in os.walk(os.path.join(data_path,'test_resize_single_del')):
 	for file in files:
 		if file.endswith('image.jpg'):
 			val_single_image_id_list.write('test_resize_single/'+file+'\t')

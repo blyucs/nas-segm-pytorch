@@ -18,10 +18,12 @@ dataset_dirs = {
             #TRAIN_LIST = '../data/datasets/celebA/train_mini.lst'
             #VAL_LIST = '../data/datasets/celebA/train_mini.lst'  # meta learning
             # 'TRAIN_LIST' : '../data/datasets/celebA/train_all_class_5000.lst',
-            'TRAIN_LIST' : '../data/datasets/celebA/train_all_class.lst',  # meta learning
+            # 'TRAIN_LIST' : '../data/datasets/celebA/train_all_class.lst',  # meta learning
             # 'TRAIN_LIST': '../data/datasets/celebA/test_all_class_3000.lst', # search
-            'VAL_LIST': '../data/datasets/celebA/test_all_class_3000.lst',  #search meta learning
-            # 'VAL_LIST': '../data/datasets/celebA/test_all_class_250.lst',  # search meta learning
+            # 'VAL_LIST': '../data/datasets/celebA/test_all_class_3000.lst',  #search meta learning
+            # 'VAL_LIST': '../data/datasets/celebA/test_all_class_250.lst',  # search meta learnin
+            'TRAIN_LIST': '../data/datasets/celebA/train_val_test_split/train_list.txt', # search
+            'VAL_LIST': '../data/datasets/celebA/train_val_test_split/test_list.txt',  #search meta learningg
         },
     'EG1800':
         {
@@ -80,19 +82,25 @@ dataset_dirs = {
 }
 
 
-META_TRAIN_PRCT = 95
+# META_TRAIN_PRCT = 95  # search
+META_TRAIN_PRCT = 100 #train for 100
 N_TASK0 = {'face_seg':1000,'celebA':1000,'EG1800':1000,'celebA-binary':1000,'helen':1000, 'helen_nohair':1000}
-SHORTER_SIDE = [512, 400]
+# SHORTER_SIDE = [512, 400] # celebA train
+# SHORTER_SIDE = [300, 400] # HELEN train
+SHORTER_SIDE = [400, 400] # HELEN train
 # CROP_SIZE = [256, 350]
-CROP_SIZE = [512, 350]
+# CROP_SIZE = [512, 350]  # celebA  train
+# CROP_SIZE = [256, 350]  # HELEN  train
+CROP_SIZE = [350, 350]  # HELEN  train
 NORMALISE_PARAMS = [1./255, # SCALE
                     np.array([0.485, 0.456, 0.406]).reshape((1, 1, 3)), # MEAN
                     np.array([0.229, 0.224, 0.225]).reshape((1, 1, 3))] # STD
-BATCH_SIZE ={'celebA':[16, 20],'EG1800':[16,1],'celebA-binary':[64,16],'helen':[16,32],'celebA-face':[16,32], 'helen_nohair':[16,32]}
+BATCH_SIZE ={'celebA':[16, 8],'EG1800':[16,1],'celebA-binary':[64,16],'helen':[16,32],'celebA-face':[16,32], 'helen_nohair':[16,32]}
+# BATCH_SIZE ={'celebA':[16, 8],'EG1800':[16,1],'celebA-binary':[64,16],'helen':[16,32],'celebA-face':[16,32], 'helen_nohair':[16,32]}
 # BATCH_SIZE ={'celebA':[16, 64],'EG1800':[16,1],'celebA-binary':[64,16],'helen':[16,32],'celebA-face':[16,32], 'helen_nohair':[16,32]}
 # BATCH_SIZE ={'celebA':[16, 1],'EG1800':[16,1],'celebA-binary':[64,16],'helen':[16,32],'celebA-face':[16,32], 'helen_nohair':[16,32]}
-NUM_WORKERS = 32
-TRAIN_EPOCH_NUM = {'celebA':[0,20],'EG1800':[0,20],'celebA-binary':[0,6],'helen':[0,200],'celebA-face':[0,10],'helen_nohair':[0,100]}
+NUM_WORKERS = 16
+TRAIN_EPOCH_NUM = {'celebA':[0,30],'EG1800':[0,20],'celebA-binary':[0,6],'helen':[0,200],'celebA-face':[0,10],'helen_nohair':[0,100]}
 
 NUM_CLASSES = {'face_seg':[11,11],'celebA':[19,19],'EG1800':[2,2],'celebA-binary':[2,2], 'helen':[11,11],'celebA-face':[11,11],'helen_nohair':[10,10]}
 LOW_SCALE = 0.7
@@ -125,9 +133,9 @@ VAL_EVERY = [5, 10] #10,4  # how often to record validation scores ; task0 valid
 SUMMARY_DIR = './tb_logs/'
 
 # OPTIMISERS' PARAMETERS
-LR_ENC = [4e-3, 4e-3]
+LR_ENC = [4e-3, 4e-3] #old
 # LR_ENC = [1e-2, 1e-2]
-LR_DEC = [1e-2, 1e-2]
+LR_DEC = [1e-2, 1e-2] #old
 
 # LR_ENC = [4e-4, 4e-4]# finetune
 # LR_DEC = [3e-3, 3e-3]#finetune
@@ -154,5 +162,5 @@ OP_SIZE = 11
 AGG_CELL_SIZE = 48
 NUM_CELLS = 3
 NUM_BRANCHES = 4
-AUX_CELL = True
+AUX_CELL = False
 SEP_REPEATS = 1

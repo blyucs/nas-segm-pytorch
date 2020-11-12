@@ -29,6 +29,7 @@ class MobileNetV2(nn.Module):
             [6, 320, 1, 1], # l8
         ]
         self.out_sizes = [24, 32, 96, 320] # l3,l4, l6, l8
+        # self.out_sizes = [24, 32, 64, 160] # l3,l4, l6, l8
         input_channel = int(32 * width_mult)
         self.last_channel = int(1280 * width_mult) if width_mult > 1.0 else 1280
         self.layer1 = conv_bn_relu6(3, input_channel, 2)
@@ -56,6 +57,8 @@ class MobileNetV2(nn.Module):
         l8 = self.layer8(l7) # 320, x / 32
 
         return l3, l4, l6, l8
+        # return l3, l4, l5, l6
+        # return l3, l4, l5, l7
 
 
 def mbv2(pretrained=False, **kwargs):

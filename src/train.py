@@ -40,7 +40,7 @@ from utils.default_args import *
 from utils.solvers import create_optimisers
 
 
-os.environ["CUDA_VISIBLE_DEVICES"]="1,2,3"
+os.environ["CUDA_VISIBLE_DEVICES"]="0,1,2,3"
 # os.environ["CUDA_VISIBLE_DEVICES"]="3"
 logging.basicConfig(level=logging.INFO)
 def get_arguments():
@@ -52,7 +52,7 @@ def get_arguments():
 
     parser = argparse.ArgumentParser(description="NAS Search")
 
-    parser.add_argument("--dataset_type", type=str, default= 'celebA',#'helen', #'celebA-face',#'EG1800',#'celebA-binary',
+    parser.add_argument("--dataset_type", type=str, default= 'helen',#'celebA',#, #'celebA-face',#'EG1800',#'celebA-binary',
                         help="dataset type to be trained or valued.")
 
     # Dataset
@@ -226,9 +226,11 @@ def main():
             # decoder_config = [[10, [1, 0, 8, 10], [0, 1, 3, 2], [7, 1, 4, 3]], [[3, 0], [3, 4], [3, 2]]] #0.095 worst all cls
             # [[10, [1, 1, 5, 2], [3, 0, 3, 4], [6, 7, 5, 9]], [[0, 0], [4, 3], [3, 1]]] #0.1293 all cls
             # decoder_config =   [[1, [1, 1, 5, 5], [1, 0, 2, 7], [1, 4, 7, 5]], [[2, 1], [3, 0], [3, 2]]] # 0.7601  new select
-            decoder_config = [[3, [1, 1, 5, 0], [0, 4, 1, 9], [4, 3, 2, 0]], [[3, 3], [2, 1], [2, 0], [1,4]]]  #0.7564
+            # decoder_config = [[3, [1, 1, 5, 0], [0, 4, 1, 9], [4, 3, 2, 0]], [[3, 3], [2, 1], [2, 0], [1,4]]]  #0.7564
             # decoder_config = [[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2]]] # 0.7816 reward
-            # decoder_config = [[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2],[0,2],[1,4]]] # 0.7816 reward
+            # decoder_config = [[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2],[0,2],[1,4]]] # HELEN-L
+            decoder_config = [[7, [1, 0, 4, 9], [4, 4, 3, 2], [3, 1, 7, 3]], [[1, 0], [2, 1], [1, 2]]] # HELEN-M
+            # decoder_config = [[10, [1, 1, 3, 7], [4, 0, 2, 2], [2, 0, 0, 10]], [[0, 2], [2, 3], [4, 0]]]# HELEN-M
             # decoder_config = [[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2],[0,2],[1,4],[0,3]]] # 0.7816 reward
             # decoder_config = [[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]] #0.9636 EG1800
             #decoder_config = [[1, [1, 0, 3, 9], [2, 3, 4, 9], [2, 1, 1, 1]], [[1, 3], [2, 0], [0, 3]]]  #0.9636 EG1800
@@ -249,7 +251,7 @@ def main():
                                           num_classes=NUM_CLASSES[args.dataset_type][0],
                                           config=decoder_config,
                                           agg_size=48,   #args.agg_cell_size, what's the fxxk
-                                          aux_cell=True,  #args.aux_cell,
+                                          aux_cell=False,  #args.aux_cell,
                                           repeats=1)#args.sep_repeats)
 
         # Fuse encoder and decoder
@@ -278,11 +280,11 @@ def main():
     # finetune_ckpt_path = './ckpt/_train_celebA-face_20200225T1518/segmenter_checkpoint_0.20.pth.tar'
     # finetune_ckpt_path = './ckpt/_train_celebA-face_20200225T1901/segmenter_checkpoint_0.14.pth.tar'
     # finetune_ckpt_path = './ckpt/_train_celebA_20200304T2257/segmenter_checkpoint_0.22.pth.tar'
-    finetune_ckpt_path ='./ckpt/_train_celebA_20200523T1135/segmenter_checkpoint_0.27.pth.tar'
-    segmenter.load_state_dict(torch.load(finetune_ckpt_path))
-    logger.info(" Loaded Encoder with #TOTAL PARAMS={:3.2f}M"
-                .format(compute_params(segmenter)[0] / 1e6))
-
+    if 0:
+        finetune_ckpt_path ='./ckpt/_train_helen_20201111T1731/segmenter_checkpoint_0.17.pth.tar'
+        segmenter.load_state_dict(torch.load(finetune_ckpt_path))
+        logger.info(" Loaded Encoder with #TOTAL PARAMS={:3.2f}M"
+                    .format(compute_params(segmenter)[0] / 1e6))
     # Create dataloader
     train_loader, val_loader, do_search = create_loaders(args)
 
@@ -414,8 +416,8 @@ def main():
             #         # break
             #     #reward = task_miou  # will be used in train_agent process
             # save the segmenter params with the best value
-            # seg_saver.save(final_loss, segmenter.state_dict(), logger) #stub to 1
-    seg_saver.save(final_loss, {'segmenter':segmenter.state_dict(),'encoder':segmenter.module.encoder.state_dict()}, logger) #stub to 1
+            seg_saver.save(final_loss, segmenter.state_dict(), logger) #stub to 1
+    # seg_saver.save(final_loss, {'segmenter':segmenter.state_dict(),'encoder':segmenter.module.encoder.state_dict()}, logger) #stub to 1
 
 
 if __name__ == '__main__':

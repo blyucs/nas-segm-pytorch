@@ -181,18 +181,18 @@ class MicroDecoder(nn.Module):
                                    (inp_sizes[ind_1], inp_sizes[ind_2]),
                                    agg_size,
                                    ctx_cell, repeats=repeats))
-            aux_clfs.append(nn.Sequential())
-            if self.aux_cell:
-                aux_clfs[block_idx].add_module(
-                    'aux_cell', ctx_cell(self.ctx, agg_size, repeats=repeats))
-            aux_clfs[block_idx].add_module(
-                'aux_clf', conv3x3(agg_size, num_classes, stride=1, bias=True))
+            # aux_clfs.append(nn.Sequential())
+            # if self.aux_cell:
+            #     aux_clfs[block_idx].add_module(
+            #         'aux_cell', ctx_cell(self.ctx, agg_size, repeats=repeats))
+            # aux_clfs[block_idx].add_module(
+            #     'aux_clf', conv3x3(agg_size, num_classes, stride=1, bias=True))
             self.collect_inds.append(block_idx + num_pools)
             inp_sizes.append(agg_size)
             ## for description
             self.pool.append('({} + {})'.format(self.pool[ind_1], self.pool[ind_2]))
         self.cells = nn.ModuleList(cells)
-        self.aux_clfs = nn.ModuleList(aux_clfs)
+        # self.aux_clfs = nn.ModuleList(aux_clfs)
         self.pre_clf = conv_bn_relu(agg_size * len(self.collect_inds),
                                     agg_size, 1, 1, 0)
         self.conv_clf = conv3x3(agg_size, num_classes, stride=1, bias=True)
@@ -213,15 +213,16 @@ class MicroDecoder(nn.Module):
 
     def forward(self, x):
         x = list(x)
-        aux_outs = []
+        # aux_outs = []
         for out_idx in range(len(x)):
             x[out_idx] = getattr(self, 'adapt{}'.format(out_idx + 1))(x[out_idx])
-        for cell, aux_clf, conn in zip(self.cells, self.aux_clfs, self.conns):
+        # for cell, aux_clf, conn in zip(self.cells, self.aux_clfs, self.conns):
+        for cell, conn in zip(self.cells, self.conns):
             cell_out = cell(x[conn[0]], x[conn[1]])
             x.append(cell_out)
-            aux_outs.append(aux_clf(cell_out.clone()))
+            # aux_outs.append(aux_clf(cell_out.clone()))
         # print(aux_outs)
-        if 0:
+        if 1:
             out = x[self.collect_inds[0]]
             for i in range(1, len(self.collect_inds)):
                 collect = x[self.collect_inds[i]]
@@ -242,7 +243,7 @@ class MicroDecoder(nn.Module):
                 # # upsample_x.weight.data = bilinear_kernel(self.collect_inds[i](1), self.collect_inds[i](1), 4)
                 # collect_out = upsample_x(collect)
                 collect_out = nn.Upsample(
-                    size=(512, 512), mode='bilinear', align_corners=False)(collect)
+                    size=(256, 256), mode='bilinear', align_corners=False)(collect)
                 if i == 0:
                     out = collect_out
                 else:
@@ -250,4 +251,5 @@ class MicroDecoder(nn.Module):
         out = F.relu(out)
         out = self.pre_clf(out)
         out = self.conv_clf(out)
-        return out, aux_outs
+        # return out, aux_outs
+        return out

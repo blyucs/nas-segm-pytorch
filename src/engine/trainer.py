@@ -219,7 +219,8 @@ def train_segmenter(
         input_var = torch.autograd.Variable(image).float()
         target_var = torch.autograd.Variable(target).float()
         # Compute output
-        output, aux_outs = segmenter(input_var)
+        # output, aux_outs = segmenter(input_var)
+        output = segmenter(input_var)
         target_var = nn.functional.interpolate(
             target_var[:, None], size=output.size()[2:], mode='nearest').long()[:, 0]
         soft_output = nn.LogSoftmax()(output)
@@ -228,14 +229,15 @@ def train_segmenter(
         # loss = focal_loss_zhihu(output,target_var)
         # loss = focal_loss_my(output,target_var)
         # Compute auxiliary loss
-        if aux_weight > 0:
-            for aux_out in aux_outs:
-                aux_out = nn.Upsample(size=target_var.size()[1:],
-                                      mode='bilinear',
-                                      align_corners=False)(aux_out)
-                aux_out = nn.LogSoftmax()(aux_out)
-                # Compute loss and backpropagate
-                loss += segm_crit(aux_out, target_var) * aux_weight
+        # if aux_weight > 0:
+        # if False:
+        #     for aux_out in aux_outs:
+        #     aux_out = nn.Upsample(size=target_var.size()[1:],
+        #                           mode='bilinear',
+        #                           align_corners=False)(aux_out)
+        #     aux_out = nn.LogSoftmax()(aux_out)
+        #     # Compute loss and backpropagate
+        #     loss += segm_crit(aux_out, target_var) * aux_weight
 
         optim_enc.zero_grad()
         optim_dec.zero_grad()

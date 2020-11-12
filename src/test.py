@@ -67,7 +67,7 @@ SEGMENTER_CKPT_PATH = \
         # 'celebA':'./ckpt/_train_celebA_20200508T1457/segmenter_checkpoint_0.53.pth.tar',  # 19 classes
         # 'celebA':'./ckpt/_train_celebA_20200508T1633/segmenter_checkpoint_0.29.pth.tar',  # 19 classes
         # 'celebA':'./ckpt/_train_celebA_20200508T1818/segmenter_checkpoint_0.20.pth.tar',  # 19 classes
-        'celebA':'./ckpt/_train_celebA_20200508T2003/segmenter_checkpoint_0.21.pth.tar',  # 19 classes
+        # 'celebA':'./ckpt/_train_celebA_20200508T2003/segmenter_checkpoint_0.21.pth.tar',  # 19 classes
         # 'celebA':'./ckpt/_train_celebA_20200510T0933/segmenter_checkpoint_0.20.pth.tar',  # 19 classes
         # 'celebA':'./ckpt/_train_celebA_20200520T1632/segmenter_checkpoint_0.13.pth.tar',  # 19 classes
         # 'celebA':'./ckpt/_train_celebA_20200521T2255/segmenter_checkpoint_0.28.pth.tar',  # 19 classes
@@ -78,6 +78,12 @@ SEGMENTER_CKPT_PATH = \
         # 'celebA':'./ckpt/_train_celebA_20200523T1135/segmenter_checkpoint_0.27.pth.tar',  # 19 classes ghostnet
         # 'celebA':'./ckpt/_train_celebA_20200523T1444/segmenter_checkpoint_0.27.pth.tar',  # 19 classes ghostnet
         # 'celebA':'./ckpt/_train_celebA_20200523T1748/segmenter_checkpoint_0.26.pth.tar',  # 19 classes ghostnet
+        # 'celebA':'./ckpt/_train_celebA_20201109T1658/segmenter_checkpoint_0.19.pth.tar',
+        # 'celebA':'./ckpt/_train_celebA_20201109T2252/segmenter_checkpoint_0.11.pth.tar',
+        # 'celebA':'./ckpt/_train_celebA_20201110T1004/segmenter_checkpoint_0.11.pth.tar',
+        # 'celebA':'./ckpt/_train_celebA_20201110T1251/segmenter_checkpoint_0.13.pth.tar',
+        # 'celebA':'./ckpt/_train_celebA_20201110T2020/segmenter_checkpoint_0.16.pth.tar',
+        'celebA':'./ckpt/_train_celebA_20201110T2332/segmenter_checkpoint_0.12.pth.tar',
         #'EG1800':'./ckpt/train20200117T1958/segmenter_checkpoint.pth.tar'
         #'EG1800':'./ckpt/train20200118T1128/segmenter_checkpoint.pth.tar' , # 00079,00094,good, the best model currently
         #'EG1800': './ckpt/_train_EG1800_20200217T1059/segmenter_checkpoint.pth.tar',
@@ -122,7 +128,12 @@ SEGMENTER_CKPT_PATH = \
         # 'helen': './ckpt/_train_helen_20200302T1943/segmenter_checkpoint_0.32.pth.tar',  #
         # 'helen': './ckpt/_train_helen_20200302T2201/segmenter_checkpoint_0.27.pth.tar',  #
         # 'helen': './ckpt/_train_helen_20200303T1147/segmenter_checkpoint_0.26.pth.tar',  #
-        'helen': './ckpt/_train_helen_20200303T2336/segmenter_checkpoint_0.25.pth.tar',  #
+        # 'helen': './ckpt/_train_helen_20200303T2336/segmenter_checkpoint_0.25.pth.tar',  #
+        # 'helen': './ckpt/_train_helen_20201111T1038/segmenter_checkpoint_0.16.pth.tar',  #
+        # 'helen': './ckpt/_train_helen_20201111T1316/segmenter_checkpoint_0.20.pth.tar',  #
+        # 'helen': './ckpt/_train_helen_20201111T1520/segmenter_checkpoint_0.16.pth.tar',  #
+        # 'helen': './ckpt/_train_helen_20201111T1731/segmenter_checkpoint_0.17.pth.tar',  #
+        'helen': './ckpt/_train_helen_20201111T2057/segmenter_checkpoint_0.22.pth.tar',  #
         # 'helen_nohair': './ckpt/_train_helen_nohair_20200303T1416/segmenter_checkpoint_0.19.pth.tar',  #
         'helen_nohair': './ckpt/_train_helen_nohair_20200303T1646/segmenter_checkpoint_0.14.pth.tar',  #
         # 'celebA-face': './ckpt/_train_celebA-face_20200225T1518/segmenter_checkpoint_0.20.pth.tar',
@@ -150,7 +161,9 @@ decoder_config = \
         'EG1800':[[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]], #0.9636 EG1800:
         'celebA-binary':[[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]], #0.9636 EG1800:
         # 'helen':[[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2]]],
-        'helen':[[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2],[0,2],[1,4]]], #cur the best
+        # 'helen':[[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2],[0,2],[1,4]]], #cur the best
+        # 'helen':[[7, [1, 0, 4, 9], [4, 4, 3, 2], [3, 1, 7, 3]], [[1, 0], [2, 1], [1, 2]]], #M
+        'helen':[[10, [1, 1, 3, 7], [4, 0, 2, 2], [2, 0, 0, 10]], [[0, 2], [2, 3], [4, 0]]], #S
         'helen_nohair':[[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2],[0,2],[1,4]]], #cur the best
         # 'helen':[[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2],[0,2],[1,4],[0,3]]], #0.89
         # 'helen':[[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2],[0,2],[1,4],[1,5]]], #0.89
@@ -314,7 +327,7 @@ def main():
                               num_classes=NUM_CLASSES[args.dataset_type][0],
                               config=decoder_config[args.dataset_type],
                               agg_size=args.agg_cell_size,
-                              aux_cell=args.aux_cell,
+                              aux_cell=False,
                               repeats=args.sep_repeats)
 
         # Fuse encoder and decoder
@@ -329,7 +342,8 @@ def main():
     del encoder
 
     #NUM_CLASSES = [17, 17]
-    segmenter.load_state_dict(torch.load(args.ckpt_path[args.dataset_type]))
+    segmenter.load_state_dict(torch.load(args.ckpt_path[args.dataset_type]), strict=False)
+    # segmenter.load_state_dict(torch.load(args.ckpt_path[args.dataset_type])['segmenter'], strict= False)
     logger.info(" Loaded Encoder with #TOTAL PARAMS={:3.2f}M"
                 .format(compute_params(segmenter)[0] / 1e6))
 
@@ -364,33 +378,32 @@ def main():
             (k, k) for k in map(lambda x: x.decode('utf-8').strip('\n'), datalist)]
 
     random_array = random.sample(range(0,len(datalist)),TEST_NUM)
-    imgs = [os.path.join(data_dir,datalist[i][0]) for i in random_array]
-    msks = [os.path.join(data_dir,datalist[i][1]) for i in random_array]
+    # imgs = [os.path.join(data_dir,datalist[i][0]) for i in random_array]
+    # msks = [os.path.join(data_dir,datalist[i][1]) for i in random_array]
 
     imgs_all = [os.path.join(data_dir,datalist[i][0]) for i in range(0,len(datalist))]
     msks_all = [os.path.join(data_dir,datalist[i][1]) for i in range(0,len(datalist))]
 
-    '''imgs = [
+    imgs = [
         # '../data/datasets/EG1800/Images/02323.png', # EG1800
         # '../data/datasets/EG1800/Images/01232.png',
         # '../data/datasets/EG1800/Images/02178.png',
         # '../data/datasets/EG1800/Images/02033.png',
         # '../data/datasets/EG1800/Images/02235.png',
         # '../data/datasets/EG1800/Images/00105.png',
-        # '../data/datasets/EG1800/Images/00105.png',
-        '../data/datasets/EG1800/00009_224.png',
-        # '../data/datasets/helen/test/141794264_1_image.jpg',   #HELEN
-        # '../data/datasets/helen/test/107635070_1_image.jpg',
-        # '../data/datasets/helen/test/1030333538_1_image.jpg',
-        # '../data/datasets/helen/test/122276700_1_image.jpg',
-        # '../data/datasets/helen/test/1344304961_1_image.jpg',
-        # '../data/datasets/helen/test/1240746154_1_image.jpg',
-        # '../data/datasets/celebA/CelebA-HA-img-resize/29044.jpg',  #celebA
-        # '../data/datasets/celebA/CelebA-HA-img-resize/27039.jpg',
-        # '../data/datasets/celebA/CelebA-HA-img-resize/27047.jpg',
-        # '../data/datasets/celebA/CelebA-HA-img-resize/27037.jpg',
-        # '../data/datasets/celebA/CelebA-HA-img-resize/29045.jpg',
-        # '../data/datasets/celebA/CelebA-HA-img-resize/29022.jpg',
+        # '../data/datasets/EG1800/00009_224.png',
+        '../data/datasets/helen/test/141794264_1_image.jpg',   #HELEN
+        '../data/datasets/helen/test/107635070_1_image.jpg',
+        '../data/datasets/helen/test/1030333538_1_image.jpg',
+        '../data/datasets/helen/test/122276700_1_image.jpg',
+        '../data/datasets/helen/test/1344304961_1_image.jpg',
+        '../data/datasets/helen/test/1240746154_1_image.jpg',
+        # '../data/datasets/celebA/CelebA-HA-img-resize/29044.jpg',  #celebA  tran
+        # '../data/datasets/celebA/CelebA-HA-img-resize/27039.jpg',  #test
+        # '../data/datasets/celebA/CelebA-HA-img-resize/27047.jpg',  #train
+        # '../data/datasets/celebA/CelebA-HA-img-resize/27037.jpg',   #train
+        # '../data/datasets/celebA/CelebA-HA-img-resize/29045.jpg',  # train
+        # '../data/datasets/celebA/CelebA-HA-img-resize/29022.jpg',  #train
         # '../data/datasets/celebA/CelebA-HA-img-resize/29312.jpg',  #celebA-generilize
         # '../data/datasets/celebA/CelebA-HA-img-resize/27039.jpg',
         # '../data/datasets/celebA/CelebA-HA-img-resize/29085.jpg',
@@ -404,13 +417,13 @@ def main():
         # '../data/datasets/EG1800/Labels/02033.png',
         # '../data/datasets/EG1800/Labels/02235.png',
         # '../data/datasets/EG1800/Labels/00105.png',
-        '../data/datasets/EG1800/00009_224_mask.png',
-        # '../data/datasets/helen/test/141794264_1_label.png',  # HELEN
-        # '../data/datasets/helen/test/107635070_1_label.png',
-        # '../data/datasets/helen/test/1030333538_1_label.png',
-        # '../data/datasets/helen/test/122276700_1_label.png',
-        # '../data/datasets/helen/test/1344304961_1_label.png',
-        # '../data/datasets/helen/test/1240746154_1_label.png'
+        # '../data/datasets/EG1800/00009_224_mask.png',
+        '../data/datasets/helen/test/141794264_1_label.png',  # HELEN
+        '../data/datasets/helen/test/107635070_1_label.png',
+        '../data/datasets/helen/test/1030333538_1_label.png',
+        '../data/datasets/helen/test/122276700_1_label.png',
+        '../data/datasets/helen/test/1344304961_1_label.png',
+        '../data/datasets/helen/test/1240746154_1_label.png'
         # '../data/datasets/celebA/CelebAMask-HQ-mask-all-class/29044.png',  #celebA
         # '../data/datasets/celebA/CelebAMask-HQ-mask-all-class/27039.png',
         # '../data/datasets/celebA/CelebAMask-HQ-mask-all-class/27047.png',
@@ -422,7 +435,7 @@ def main():
         # '../data/datasets/celebA/CelebAMask-HQ-mask-all-class/29085.png',
         # '../data/datasets/celebA/CelebAMask-HQ-mask-all-class/29068.png',
         # '../data/datasets/celebA/CelebAMask-HQ-mask-all-class/29039.png',
-    ]'''
+    ]
 
     show_raw_portrait_seg = 1
     for i,img_path in enumerate(imgs):
@@ -450,12 +463,14 @@ def main():
         img_inp = torch.tensor(prepare_img(img).transpose(2, 0, 1)[None]).float().to(device)
         segm = segmenter(img_inp)[0].squeeze().data.cpu().numpy().transpose((1, 2, 0)) #47*63*21
         #cal params and flops
-        # input = torch.randn(1,3,512,512)
-        flops, params = profile(segmenter, inputs = (img_inp,), )
+        # input = torch.randn(1,3,224,224)
+        input = torch.randn(1,3,512,512)
+        # flops, params = profile(segmenter, inputs = (img_inp,), )
+        flops, params = profile(segmenter, inputs = (input,), )
         flops, params = clever_format([flops, params], "%.3f")
         print(flops)
         print(params)
-        # segm = cv2.resize(segm, orig_size, interpolation=cv2.INTER_CUBIC) #375*500*21
+        segm = cv2.resize(segm, orig_size, interpolation=cv2.INTER_CUBIC) #375*500*21  #EG1800 need
         segm = segm.argmax(axis=2).astype(np.uint8)
         if args.dataset_type =='EG1800'  and show_raw_portrait_seg:
             img_segm = img.copy()

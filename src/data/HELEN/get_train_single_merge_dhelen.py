@@ -10,7 +10,7 @@ import fnmatch
 import shutil
 data_path = '../../../data/datasets/helen/'
 
-train_image_id_list = open(os.path.join(data_path, 'train_single_merge_dhelen.lst'), 'w')
+train_image_id_list = open(os.path.join(data_path, 'train_single_merge_dhelen_1110.lst'), 'w')
 #remove the duplicate files
 # for fpathe,dirs,files in os.walk(os.path.join(data_path,'train_single_merge_dhelen')):
 # 	for file in files:
