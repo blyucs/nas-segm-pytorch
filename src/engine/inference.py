@@ -48,7 +48,8 @@ def validate(segmenter, val_loader, epoch, epoch2, num_classes=-1, print_every=1
             #plt.show()
             input_var = torch.autograd.Variable(image).float().cuda()
             # Compute output
-            output, _ = segmenter(input_var)
+            # output, _ = segmenter(input_var)
+            output = segmenter(input_var)
             output = nn.Upsample(size=target.size()[1:], mode='bilinear',
                                  align_corners=False)(output)
             # Compute IoU

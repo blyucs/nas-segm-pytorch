@@ -45,8 +45,8 @@ def create_loaders(args):
         Normalise(*args.normalise_params),
         ToTensor()])
     composed_val = transforms.Compose([   # does not mean while training, but means in searching
-        # ResizeShorterScale(args.val_shorter_side, 1, 1),  # no
-        # CentralCrop(args.val_crop_size), # no
+        ResizeShorterScale(args.val_shorter_side, 1, 1),  # no
+        CentralCrop(args.val_crop_size), # no
         # ValResizeShorterScale(args.val_shorter_side, 1, 1), #yes
         Normalise(*args.normalise_params),  #  no
         ToTensor()])

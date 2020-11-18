@@ -101,6 +101,8 @@ SEGMENTER_CKPT_PATH = \
         # 'EG1800': './ckpt/_train_EG1800_20200218T1842/segmenter_checkpoint.pth.tar',
         'EG1800': './ckpt/_train_EG1800_20200218T2034/segmenter_checkpoint.pth.tar',  #0.967
         # 'EG1800': './ckpt/_train_EG1800_20200218T2158/segmenter_checkpoint.pth.tar',  #0.873
+        # 'EG1800': './ckpt/_train_EG1800_20201112T1246/segmenter_checkpoint_0.07.pth.tar',  #0.873
+        # 'EG1800': './ckpt/_train_EG1800_20201112T1506/segmenter_checkpoint_0.13.pth.tar',  #0.873
         # 'helen': './ckpt/_train_helen_20200223T1724/segmenter_checkpoint.pth.tar',  #0.81
         # 'helen': './ckpt/_train_helen_20200224T1611/segmenter_checkpoint.pth.tar',  # 0.81
         # 'helen': './ckpt/_train_helen_20200225T1319/segmenter_checkpoint.pth.tar',  # no pre-trained mobilenetV2 poor performance
@@ -157,9 +159,11 @@ decoder_config = \
         'celebA':  [[3, [1, 1, 5, 0], [0, 4, 1, 9], [4, 3, 2, 0]], [[3, 3], [2, 1], [2, 0], [1,4]]] ,  #
         # 'celebA':  [[1, [0, 0, 5, 1], [3, 2, 1, 10], [3, 5, 10, 9]], [[2, 3], [1, 2], [2, 2]]] ,  #
         # 'celebA':  [[9, [1, 0, 1, 1], [3, 3, 0, 0], [7, 6, 4, 2]], [[3, 3], [3, 4], [5, 5]]] ,  #
-        #'EG1800':[[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]], #0.9636 EG1800
+        'EG1800':[[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]], #0.9636 EG1800
         # 'EG1800': [[2, [1, 0, 10, 8], [2, 3, 1, 8], [2, 1, 2, 2]], [[3, 1], [2, 4], [5, 5]]],
-        'EG1800':[[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]], #0.9636 EG1800:
+        # 'EG1800':[[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]], #0.9636 EG1800:
+        # 'EG1800':[[2, [1, 0, 10, 8], [2, 3, 1, 8], [2, 1, 2, 2]], [[3, 1], [2, 4], [5, 0]]], #0.9636 EG1800:
+        # 'EG1800':[[1, [1, 0, 3, 9], [2, 3, 4, 9], [2, 1, 1, 1]], [[1, 3], [2, 0], [0, 3]]], #0.9636 EG1800:
         'celebA-binary':[[1, [0, 0, 10, 9], [0, 1, 2, 7], [2, 0, 0, 9]], [[2, 0], [3, 2], [2, 4]]], #0.9636 EG1800:
         # 'helen':[[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2]]],
         # 'helen':[[5, [1, 0, 3, 5], [1, 0, 10, 10], [6, 6, 0, 10]], [[1, 0], [4, 2], [3, 2],[0,2],[1,4]]], #cur the best
@@ -386,19 +390,19 @@ def main():
     msks_all = [os.path.join(data_dir,datalist[i][1]) for i in range(0,len(datalist))]
 
     imgs = [
-        # '../data/datasets/EG1800/Images/02323.png', # EG1800
-        # '../data/datasets/EG1800/Images/01232.png',
-        # '../data/datasets/EG1800/Images/02178.png',
-        # '../data/datasets/EG1800/Images/02033.png',
-        # '../data/datasets/EG1800/Images/02235.png',
-        # '../data/datasets/EG1800/Images/00105.png',
+        '../data/datasets/EG1800/Images/02323.png', # EG1800
+        '../data/datasets/EG1800/Images/01232.png',
+        '../data/datasets/EG1800/Images/02178.png',
+        '../data/datasets/EG1800/Images/02033.png',
+        '../data/datasets/EG1800/Images/02235.png',
+        '../data/datasets/EG1800/Images/00105.png',
         # '../data/datasets/EG1800/00009_224.png',
-        '../data/datasets/helen/test/141794264_1_image.jpg',   #HELEN
-        '../data/datasets/helen/test/107635070_1_image.jpg',
-        '../data/datasets/helen/test/1030333538_1_image.jpg',
-        '../data/datasets/helen/test/122276700_1_image.jpg',
-        '../data/datasets/helen/test/1344304961_1_image.jpg',
-        '../data/datasets/helen/test/1240746154_1_image.jpg',
+        # '../data/datasets/helen/test/141794264_1_image.jpg',   #HELEN
+        # '../data/datasets/helen/test/107635070_1_image.jpg',
+        # '../data/datasets/helen/test/1030333538_1_image.jpg',
+        # '../data/datasets/helen/test/122276700_1_image.jpg',
+        # '../data/datasets/helen/test/1344304961_1_image.jpg',
+        # '../data/datasets/helen/test/1240746154_1_image.jpg',
         # '../data/datasets/celebA/CelebA-HA-img-resize/29044.jpg',  #celebA  tran
         # '../data/datasets/celebA/CelebA-HA-img-resize/27039.jpg',  #test
         # '../data/datasets/celebA/CelebA-HA-img-resize/27047.jpg',  #train
@@ -412,19 +416,19 @@ def main():
         # '../data/datasets/celebA/CelebA-HA-img-resize/29039.jpg',
     ]
     msks = [
-        # '../data/datasets/EG1800/Labels/02323.png',  # EG1800
-        # '../data/datasets/EG1800/Labels/01232.png',
-        # '../data/datasets/EG1800/Labels/02178.png',
-        # '../data/datasets/EG1800/Labels/02033.png',
-        # '../data/datasets/EG1800/Labels/02235.png',
-        # '../data/datasets/EG1800/Labels/00105.png',
+        '../data/datasets/EG1800/Labels/02323.png',  # EG1800
+        '../data/datasets/EG1800/Labels/01232.png',
+        '../data/datasets/EG1800/Labels/02178.png',
+        '../data/datasets/EG1800/Labels/02033.png',
+        '../data/datasets/EG1800/Labels/02235.png',
+        '../data/datasets/EG1800/Labels/00105.png',
         # '../data/datasets/EG1800/00009_224_mask.png',
-        '../data/datasets/helen/test/141794264_1_label.png',  # HELEN
-        '../data/datasets/helen/test/107635070_1_label.png',
-        '../data/datasets/helen/test/1030333538_1_label.png',
-        '../data/datasets/helen/test/122276700_1_label.png',
-        '../data/datasets/helen/test/1344304961_1_label.png',
-        '../data/datasets/helen/test/1240746154_1_label.png'
+        # '../data/datasets/helen/test/141794264_1_label.png',  # HELEN
+        # '../data/datasets/helen/test/107635070_1_label.png',
+        # '../data/datasets/helen/test/1030333538_1_label.png',
+        # '../data/datasets/helen/test/122276700_1_label.png',
+        # '../data/datasets/helen/test/1344304961_1_label.png',
+        # '../data/datasets/helen/test/1240746154_1_label.png'
         # '../data/datasets/celebA/CelebAMask-HQ-mask-all-class/29044.png',  #celebA
         # '../data/datasets/celebA/CelebAMask-HQ-mask-all-class/27039.png',
         # '../data/datasets/celebA/CelebAMask-HQ-mask-all-class/27047.png',
@@ -465,7 +469,7 @@ def main():
         segm = segmenter(img_inp)[0].squeeze().data.cpu().numpy().transpose((1, 2, 0)) #47*63*21
         #cal params and flops
         # input = torch.randn(1,3,224,224)
-        input = torch.randn(1,3,512,512)
+        input = torch.randn(1,3,224,224)
         # flops, params = profile(segmenter, inputs = (img_inp,), )
         flops, params = profile(segmenter, inputs = (input,), )
         flops, params = clever_format([flops, params], "%.3f")
