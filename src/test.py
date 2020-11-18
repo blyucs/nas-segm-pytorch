@@ -132,7 +132,7 @@ SEGMENTER_CKPT_PATH = \
         # 'helen': './ckpt/_train_helen_20201111T1038/segmenter_checkpoint_0.16.pth.tar',  #
         # 'helen': './ckpt/_train_helen_20201111T1316/segmenter_checkpoint_0.20.pth.tar',  #
         # 'helen': './ckpt/_train_helen_20201111T1520/segmenter_checkpoint_0.15.pth.tar',  #
-        'helen': './ckpt/_train_helen_20201111T1731/segmenter_checkpoint_0.17.pth.tar',  #
+        # 'helen': './ckpt/_train_helen_20201111T1731/segmenter_checkpoint_0.17.pth.tar',  #
         # 'helen': './ckpt/_train_helen_20201111T2057/segmenter_checkpoint_0.22.pth.tar',  #
 	    # 'helen': './ckpt/_train_helen_20201112T0954/segmenter_checkpoint_0.15.pth.tar',  #
         # 'helen_nohair': './ckpt/_train_helen_nohair_20200303T1416/segmenter_checkpoint_0.19.pth.tar',  #
